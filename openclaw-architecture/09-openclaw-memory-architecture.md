@@ -126,7 +126,7 @@ OpenClaw supports 4 embedding providers with automatic selection:
 | **OpenAI** | `text-embedding-3-small` | 1536 | 8192 | Yes (async file upload) |
 | **Gemini** | `gemini-embedding-001` | varies | varies | Yes |
 | **Voyage** | `voyage-4-large` | varies | varies | Yes |
-| **Local** | `embeddinggemma-300m` (GGUF) | varies | varies | No |
+| **Local** | `embeddinggemma-300m` (GGUF) | varies | 2048 | No |
 
 **Auto-selection order**: local (if model file exists) -> openai -> gemini -> voyage
 
@@ -185,6 +185,24 @@ For large reindexing operations, OpenClaw supports async batch APIs:
 
 Batch processing is useful during full reindex (hundreds of chunks), while individual embedding requests are used for incremental updates.
 
+### 3.5 Security: Guarded Remote HTTP
+
+File: `src/memory/remote-http.ts`
+
+All remote embedding API calls (and batch API calls) are routed through a **guarded remote HTTP helper** that enforces SSRF protection:
+- Builds an allow-list policy from the configured base URL (`allowedHostnames: [parsed.hostname]`)
+- Cross-host redirects are blocked while configured operator endpoints continue to work
+- Uses `fetchWithSsrFGuard()` from `src/infra/net/fetch-guard.ts`
+- Applied to all embedding providers and batch APIs
+
+### 3.6 Input Hard-Caps
+
+Embedding inputs are hard-capped before being sent to any provider:
+- **Local provider**: 2048 tokens max (added to prevent OOM with small GGUF models)
+- **Gemini**: 2048 tokens max
+- **OpenAI**: 8192 tokens max
+- Chunks exceeding the cap are truncated before embedding, preventing batch failures
+
 ---
 
 ## 4. Hybrid Search Architecture
@@ -198,7 +216,7 @@ User query: "What did we decide about the API authentication?"
   |
   v
 Query Expansion (query-expansion.ts)
-  - Remove stop words (English + Chinese)
+  - Remove stop words (English, Chinese, Japanese, Korean, Spanish, Portuguese, Arabic)
   - Tokenize CJK characters (unigrams + bigrams)
   - Validate keyword length (min 3 chars for English)
   - Result: ["decided", "API", "authentication"]
@@ -254,10 +272,13 @@ The 70/30 split was chosen because semantic understanding is more important for 
 
 ```
 Best case:  sqlite-vec + FTS5 + embeddings -> full hybrid search
-Fallback 1: FTS5 only (no vector extension) -> keyword search only
-Fallback 2: In-memory cosine similarity (sqlite-vec unavailable, embeddings exist)
-Fallback 3: QMD external sidecar (alternative backend)
+Fallback 1: Keyword hits preserved when vector search returns empty (hybrid keeps FTS results)
+Fallback 2: FTS5 only (no vector extension) -> keyword search only
+Fallback 3: In-memory cosine similarity (sqlite-vec unavailable, embeddings exist)
+Fallback 4: QMD external sidecar (alternative backend)
 ```
+
+**Important fix**: When the vector search returns no results but keyword search does, the hybrid merger now preserves the keyword hits rather than discarding them. This ensures exact-match queries always surface results even when embeddings miss.
 
 ---
 
@@ -274,6 +295,7 @@ The index stays up-to-date through multiple trigger mechanisms:
 | **On session start** | Agent session begins | Memory files only |
 | **Interval** | Configurable periodic sync | Both memory + sessions |
 | **Session delta** | Session JSONL grows by 100KB or 50 messages | Session files only |
+| **Source change** | Memory `sources` config changes (e.g., adding "sessions") | Full reindex triggered |
 
 ### 5.2 Incremental vs Full Reindex
 
@@ -301,6 +323,10 @@ For each file:
 ```
 
 This atomic swap ensures the index is never in a half-written state, even if the process crashes during reindex.
+
+**Readonly filesystem recovery**: If the index database is on a readonly filesystem, the sync engine detects this gracefully and operates in read-only mode without crashing. It will retry when the filesystem becomes writable again.
+
+**Async sync close race fix**: A race condition where `close()` could be called while an async sync was in progress has been fixed, preventing database corruption during shutdown.
 
 ### 5.3 File Watcher
 
@@ -342,6 +368,8 @@ The agent then:
 
 **Trigger condition**: Session tokens approach the soft threshold (default 4000 tokens before compaction limit).
 
+**Token accounting fix**: The flush gating logic now correctly accounts for context tokens when deciding whether to trigger, preventing premature or missed flushes. Byte-size parsing for the soft threshold has been extracted to a shared `src/config/byte-size.ts` helper.
+
 ### 6.3 Why This Matters
 
 This is a critical design decision: it means **no information is lost during compaction**. The agent gets a chance to persist anything important before it's summarized away. The date-stamped filenames also create a natural timeline of what the agent learned and when.
@@ -378,9 +406,12 @@ Pi Agent provides the foundational session management:
 OpenClaw wraps Pi's primitives with additional capabilities:
 
 **Session Write Lock** (`src/agents/session-write-lock.ts`):
-- File-based locking (`.lock` files with PID)
+- File-based locking (`.lock` files with PID + process start time)
 - Prevents concurrent session writes from multiple agents
 - Stale lock detection: 30min default, checks PID alive
+- **PID recycling detection** (Linux): Records process start time (`/proc/pid/stat` field 22) in lock file; if PID is alive but start time differs, the lock is treated as stale and reclaimed (prevents container PID reuse from blocking locks)
+- **Orphan self-PID lock reclamation**: Detects and reclaims lock files left by the current process from a previous crash
+- **Lock contention hardening**: Improved fairness under concurrent access with FIFO queue
 - Watchdog: 60s interval checking for expired locks
 - Graceful cleanup on SIGINT/SIGTERM/SIGQUIT/SIGABRT
 
@@ -433,10 +464,15 @@ Architecture:
 - Better performance on large knowledge bases
 - Separate update/embed intervals (5min update, 60min embed)
 - Manages collections: memory paths, custom paths, session exports
+- **Han-script BM25 normalization**: CJK queries are preprocessed through `extractKeywords()` to filter single-character unigrams (too broad for BM25), deduplicate, and cap at 12 keywords
+- **Mixed-source result diversification**: When results come from both memory and session sources, QMD interleaves them to avoid one source dominating
+- **Legacy collection migration**: Automatically migrates unscoped collections to the new scoped format
+- **mcporter keep-alive**: QMD searches can be routed through mcporter for persistent connections
+- **stdout discarding**: Update/embed operations discard stdout to prevent output cap failures on large knowledge bases
 
 **Query Modes**:
-- `search`: Faster, lower recall
-- `query`: Slower, better recall
+- `search`: Faster, lower recall (Han-script normalization applied)
+- `query`: Slower, better recall (Han-script normalization applied)
 
 **Fallback Wrapper** (`search-manager.ts::FallbackMemoryManager`):
 - Tries QMD first
@@ -466,6 +502,8 @@ File: `src/agents/tools/memory-tool.ts`
 ```
 
 The tool description says "Mandatory recall step" -- this is intentional. It trains the agent to always check memory before answering from (potentially outdated) context.
+
+**Unavailable status**: When memory search is disabled or the backend is unreachable, the tool now returns an explicit `{ results: [], disabled: true, error: "..." }` response rather than silently failing, giving the agent clear feedback about why recall is unavailable.
 
 ### 9.2 Memory Get Tool
 
@@ -581,7 +619,7 @@ memory_search tool invoked with query
 Async sync if dirty (flush latest changes)
   |
   v
-Query expansion (stop words, CJK tokenization)
+Query expansion (stop words for 7 languages, CJK tokenization)
   |
   v
 Parallel: vector search (sqlite-vec) + keyword search (FTS5)
@@ -707,4 +745,7 @@ Next sync indexes the new memories
 | **Flush** | `src/auto-reply/reply/memory-flush.ts` | Pre-compaction persistence |
 | **Pruning** | `src/agents/pi-extensions/context-pruning/` | Mid-conversation pruning |
 | **Lock** | `src/agents/session-write-lock.ts` | Concurrent write prevention |
+| **Security** | `src/memory/remote-http.ts` | Guarded remote HTTP (SSRF protection) |
+| **Limits** | `src/memory/embedding-model-limits.ts` | Per-provider input token caps |
 | **Config** | `src/agents/memory-search.ts` | Configuration resolution |
+| **Config** | `src/config/byte-size.ts` | Shared byte-size parsing for flush thresholds |

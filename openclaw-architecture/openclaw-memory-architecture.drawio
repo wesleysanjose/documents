@@ -1,210 +1,231 @@
 <mxGraphModel>
   <root>
-    <mxCell id="0"/>
-    <mxCell id="1" parent="0"/>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
 
     <!-- Title -->
     <mxCell id="title" value="OpenClaw Memory &amp; Knowledge System Architecture" style="text;fontSize=18;fontStyle=1;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-      <mxGeometry x="120" y="10" width="560" height="30" as="geometry"/>
+      <mxGeometry x="120" y="10" width="560" height="30" as="geometry" />
     </mxCell>
 
     <!-- Legend -->
     <mxCell id="leg1" value="OpenClaw" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="40" y="50" width="80" height="24" as="geometry"/>
+      <mxGeometry x="40" y="50" width="80" height="24" as="geometry" />
     </mxCell>
     <mxCell id="leg2" value="Pi Agent" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="130" y="50" width="80" height="24" as="geometry"/>
+      <mxGeometry x="130" y="50" width="80" height="24" as="geometry" />
     </mxCell>
     <mxCell id="leg3" value="User-Authored" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="220" y="50" width="90" height="24" as="geometry"/>
+      <mxGeometry x="220" y="50" width="90" height="24" as="geometry" />
     </mxCell>
     <mxCell id="leg4" value="SQLite" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="320" y="50" width="80" height="24" as="geometry"/>
+      <mxGeometry x="320" y="50" width="80" height="24" as="geometry" />
     </mxCell>
 
     <!-- Layer 3: Agent Interface -->
     <mxCell id="layer3-bg" value="" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;opacity=30;" vertex="1" parent="1">
-      <mxGeometry x="40" y="90" width="720" height="80" as="geometry"/>
+      <mxGeometry x="40" y="90" width="720" height="80" as="geometry" />
     </mxCell>
     <mxCell id="layer3-label" value="Layer 3: Agent Interface" style="text;fontSize=12;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-      <mxGeometry x="50" y="92" width="200" height="20" as="geometry"/>
+      <mxGeometry x="50" y="92" width="200" height="20" as="geometry" />
     </mxCell>
 
-    <mxCell id="mem-search-tool" value="memory_search&#xa;Tool" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="60" y="118" width="120" height="40" as="geometry"/>
+    <mxCell id="mem-search-tool" value="memory_search
+Tool" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="118" width="120" height="40" as="geometry" />
     </mxCell>
-    <mxCell id="mem-get-tool" value="memory_get&#xa;Tool" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="200" y="118" width="120" height="40" as="geometry"/>
+    <mxCell id="mem-get-tool" value="memory_get
+Tool" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="200" y="118" width="120" height="40" as="geometry" />
     </mxCell>
-    <mxCell id="bootstrap" value="Bootstrap&#xa;Injection" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="340" y="118" width="120" height="40" as="geometry"/>
+    <mxCell id="bootstrap" value="Bootstrap
+Injection" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="340" y="118" width="120" height="40" as="geometry" />
     </mxCell>
-    <mxCell id="citations" value="Citations&#xa;Engine" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="480" y="118" width="120" height="40" as="geometry"/>
+    <mxCell id="citations" value="Citations
+Engine" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="480" y="118" width="120" height="40" as="geometry" />
     </mxCell>
-    <mxCell id="mem-cli" value="memory&#xa;CLI" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="620" y="118" width="120" height="40" as="geometry"/>
+    <mxCell id="mem-cli" value="memory
+CLI" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="620" y="118" width="120" height="40" as="geometry" />
     </mxCell>
 
     <!-- Layer 2: Memory Index -->
     <mxCell id="layer2-bg" value="" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;opacity=30;" vertex="1" parent="1">
-      <mxGeometry x="40" y="190" width="720" height="260" as="geometry"/>
+      <mxGeometry x="40" y="190" width="720" height="260" as="geometry" />
     </mxCell>
     <mxCell id="layer2-label" value="Layer 2: Memory Index Engine (OpenClaw)" style="text;fontSize=12;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-      <mxGeometry x="50" y="192" width="300" height="20" as="geometry"/>
+      <mxGeometry x="50" y="192" width="300" height="20" as="geometry" />
     </mxCell>
 
     <!-- Search sublayer -->
-    <mxCell id="hybrid-search" value="Hybrid Search&#xa;70% Vector + 30% Keyword" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="60" y="218" width="180" height="44" as="geometry"/>
+    <mxCell id="hybrid-search" value="Hybrid Search
+70% Vector + 30% Keyword" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="218" width="180" height="44" as="geometry" />
     </mxCell>
-    <mxCell id="query-exp" value="Query&#xa;Expansion" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="260" y="218" width="100" height="44" as="geometry"/>
+    <mxCell id="query-exp" value="Query Expansion
+7 Languages" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="260" y="218" width="100" height="44" as="geometry" /></mxCell>
+    <mxCell id="temporal" value="Temporal
+Decay" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="380" y="218" width="90" height="44" as="geometry" />
     </mxCell>
-    <mxCell id="temporal" value="Temporal&#xa;Decay" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="380" y="218" width="90" height="44" as="geometry"/>
+    <mxCell id="mmr" value="MMR
+Re-ranking" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="490" y="218" width="90" height="44" as="geometry" />
     </mxCell>
-    <mxCell id="mmr" value="MMR&#xa;Re-ranking" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="490" y="218" width="90" height="44" as="geometry"/>
-    </mxCell>
-    <mxCell id="qmd" value="QMD&#xa;Backend" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;dashed=1;" vertex="1" parent="1">
-      <mxGeometry x="600" y="218" width="90" height="44" as="geometry"/>
-    </mxCell>
+    <mxCell id="qmd" value="QMD Backend
++Han BM25" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;dashed=1;" vertex="1" parent="1"><mxGeometry x="600" y="218" width="90" height="44" as="geometry" /></mxCell>
 
     <!-- Embedding sublayer -->
     <mxCell id="embed-pipeline" value="Embedding Pipeline" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="60" y="280" width="140" height="36" as="geometry"/>
+      <mxGeometry x="60" y="280" width="140" height="36" as="geometry" />
     </mxCell>
     <mxCell id="openai-embed" value="OpenAI" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="220" y="280" width="70" height="36" as="geometry"/>
+      <mxGeometry x="220" y="280" width="70" height="36" as="geometry" />
     </mxCell>
     <mxCell id="gemini-embed" value="Gemini" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="300" y="280" width="70" height="36" as="geometry"/>
+      <mxGeometry x="300" y="280" width="70" height="36" as="geometry" />
     </mxCell>
     <mxCell id="voyage-embed" value="Voyage" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="380" y="280" width="70" height="36" as="geometry"/>
+      <mxGeometry x="380" y="280" width="70" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="local-embed" value="Local&#xa;(GGUF)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="460" y="280" width="70" height="36" as="geometry"/>
+    <mxCell id="local-embed" value="Local
+(GGUF)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="460" y="280" width="70" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="chunking" value="Chunking&#xa;400tok/80ovlp" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="550" y="280" width="100" height="36" as="geometry"/>
+    <mxCell id="chunking" value="Chunking
+400tok/80ovlp" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="550" y="280" width="100" height="36" as="geometry" />
     </mxCell>
 
     <!-- Sync sublayer -->
     <mxCell id="sync-engine" value="Sync Engine" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="60" y="334" width="120" height="36" as="geometry"/>
+      <mxGeometry x="60" y="334" width="120" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="file-watcher" value="File Watcher&#xa;(chokidar)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="200" y="334" width="100" height="36" as="geometry"/>
+    <mxCell id="file-watcher" value="File Watcher
+(chokidar)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="200" y="334" width="100" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="mem-flush" value="Memory Flush&#xa;(Pre-Compaction)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="320" y="334" width="120" height="36" as="geometry"/>
+    <mxCell id="mem-flush" value="Memory Flush
+(Pre-Compaction)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="334" width="120" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="atomic-swap" value="Atomic&#xa;Reindex" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="460" y="334" width="80" height="36" as="geometry"/>
+    <mxCell id="atomic-swap" value="Atomic
+Reindex" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="460" y="334" width="80" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="ctx-prune" value="Context&#xa;Pruning" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="560" y="334" width="80" height="36" as="geometry"/>
+    <mxCell id="ctx-prune" value="Context
+Pruning" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="560" y="334" width="80" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="write-lock" value="Session&#xa;Write Lock" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="660" y="334" width="80" height="36" as="geometry"/>
-    </mxCell>
+    <mxCell id="write-lock" value="Write Lock
++PID Recycle" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1"><mxGeometry x="660" y="334" width="80" height="36" as="geometry" /></mxCell>
 
     <!-- SQLite Store -->
     <mxCell id="sqlite-bg" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=40;" vertex="1" parent="1">
-      <mxGeometry x="60" y="388" width="690" height="50" as="geometry"/>
+      <mxGeometry x="60" y="388" width="690" height="50" as="geometry" />
     </mxCell>
     <mxCell id="meta-tbl" value="meta" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="70" y="395" width="70" height="36" as="geometry"/>
+      <mxGeometry x="70" y="395" width="70" height="36" as="geometry" />
     </mxCell>
     <mxCell id="files-tbl" value="files" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="150" y="395" width="70" height="36" as="geometry"/>
+      <mxGeometry x="150" y="395" width="70" height="36" as="geometry" />
     </mxCell>
     <mxCell id="chunks-tbl" value="chunks" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="230" y="395" width="80" height="36" as="geometry"/>
+      <mxGeometry x="230" y="395" width="80" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="cache-tbl" value="embedding&#xa;cache" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="320" y="395" width="90" height="36" as="geometry"/>
+    <mxCell id="cache-tbl" value="embedding
+cache" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="320" y="395" width="90" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="fts-tbl" value="chunks_fts&#xa;(FTS5)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="420" y="395" width="100" height="36" as="geometry"/>
+    <mxCell id="fts-tbl" value="chunks_fts
+(FTS5)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="420" y="395" width="100" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="vec-tbl" value="chunks_vec&#xa;(sqlite-vec)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
-      <mxGeometry x="530" y="395" width="100" height="36" as="geometry"/>
+    <mxCell id="vec-tbl" value="chunks_vec
+(sqlite-vec)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="530" y="395" width="100" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="sqlite-label" value="SQLite&#xa;per-agent" style="text;fontSize=10;fontStyle=2;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-      <mxGeometry x="650" y="395" width="80" height="36" as="geometry"/>
+    <mxCell id="sqlite-label" value="SQLite
+per-agent" style="text;fontSize=10;fontStyle=2;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="650" y="395" width="80" height="36" as="geometry" />
     </mxCell>
 
     <!-- Layer 1: Session Primitives -->
     <mxCell id="layer1-bg" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;opacity=20;" vertex="1" parent="1">
-      <mxGeometry x="40" y="460" width="720" height="70" as="geometry"/>
+      <mxGeometry x="40" y="460" width="720" height="70" as="geometry" />
     </mxCell>
     <mxCell id="layer1-label" value="Layer 1: Session Primitives (Pi Agent Core)" style="text;fontSize=12;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-      <mxGeometry x="50" y="462" width="300" height="20" as="geometry"/>
+      <mxGeometry x="50" y="462" width="300" height="20" as="geometry" />
     </mxCell>
 
-    <mxCell id="session-mgr" value="SessionManager&#xa;(JSONL append-only)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="60" y="486" width="150" height="36" as="geometry"/>
+    <mxCell id="session-mgr" value="SessionManager
+(JSONL append-only)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="60" y="486" width="150" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="compaction" value="Compaction&#xa;Engine" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="230" y="486" width="110" height="36" as="geometry"/>
+    <mxCell id="compaction" value="Compaction
+Engine" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="230" y="486" width="110" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="branching" value="Session&#xa;Branching" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="360" y="486" width="100" height="36" as="geometry"/>
+    <mxCell id="branching" value="Session
+Branching" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="360" y="486" width="100" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="cut-point" value="findCutPoint&#xa;+ Summary" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="480" y="486" width="110" height="36" as="geometry"/>
+    <mxCell id="cut-point" value="findCutPoint
++ Summary" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="480" y="486" width="110" height="36" as="geometry" />
     </mxCell>
-    <mxCell id="agent-session" value="AgentSession&#xa;Wrapper" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="610" y="486" width="110" height="36" as="geometry"/>
+    <mxCell id="agent-session" value="AgentSession
+Wrapper" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="610" y="486" width="110" height="36" as="geometry" />
     </mxCell>
 
     <!-- Source of Truth: User Files -->
     <mxCell id="sot-bg" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;opacity=30;" vertex="1" parent="1">
-      <mxGeometry x="40" y="550" width="720" height="60" as="geometry"/>
+      <mxGeometry x="40" y="550" width="720" height="60" as="geometry" />
     </mxCell>
     <mxCell id="sot-label" value="Source of Truth: User-Authored Files" style="text;fontSize=12;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
-      <mxGeometry x="50" y="552" width="280" height="20" as="geometry"/>
+      <mxGeometry x="50" y="552" width="280" height="20" as="geometry" />
     </mxCell>
     <mxCell id="memory-md" value="MEMORY.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="60" y="576" width="110" height="28" as="geometry"/>
+      <mxGeometry x="60" y="576" width="110" height="28" as="geometry" />
     </mxCell>
     <mxCell id="memory-dir" value="memory/*.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="190" y="576" width="110" height="28" as="geometry"/>
+      <mxGeometry x="190" y="576" width="110" height="28" as="geometry" />
     </mxCell>
     <mxCell id="extra-paths" value="Extra Paths" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="320" y="576" width="100" height="28" as="geometry"/>
+      <mxGeometry x="320" y="576" width="100" height="28" as="geometry" />
     </mxCell>
     <mxCell id="session-jsonl" value="sessions/*.jsonl" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="440" y="576" width="120" height="28" as="geometry"/>
+      <mxGeometry x="440" y="576" width="120" height="28" as="geometry" />
     </mxCell>
     <mxCell id="agent-yaml" value="Agent YAML Config" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
-      <mxGeometry x="580" y="576" width="130" height="28" as="geometry"/>
+      <mxGeometry x="580" y="576" width="130" height="28" as="geometry" />
     </mxCell>
 
     <!-- Key edges -->
     <mxCell id="e1" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.3;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="mem-search-tool" target="hybrid-search">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="e2" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="hybrid-search" target="embed-pipeline">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="e3" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="embed-pipeline" target="chunks-tbl">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="e4" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#666666;" edge="1" parent="1" source="sync-engine" target="files-tbl">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="e5" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="file-watcher" target="memory-md">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="e6" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="mem-flush" target="compaction">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
     <mxCell id="e7" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#9673a6;" edge="1" parent="1" source="session-mgr" target="session-jsonl">
-      <mxGeometry relative="1" as="geometry"/>
+      <mxGeometry relative="1" as="geometry" />
     </mxCell>
-  </root>
+  <mxCell id="ssrf-guard" value="SSRF
+Guard" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1"><mxGeometry x="660" y="280" width="70" height="36" as="geometry" /></mxCell></root>
 </mxGraphModel>

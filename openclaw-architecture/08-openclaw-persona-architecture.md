@@ -123,6 +123,49 @@ const MINIMAL_BOOTSTRAP_ALLOWLIST = new Set([
 
 **Why?** Sub-agents are operational workers, not personas. Injecting SOUL.md into a sub-agent that's just running a search query wastes tokens and can cause the sub-agent to adopt personality quirks that interfere with task execution.
 
+### Bootstrap Context Mode (NEW)
+
+A new `BootstrapContextMode` controls how much bootstrap context different run types receive:
+
+```typescript
+type BootstrapContextMode = "full" | "lightweight";
+type BootstrapContextRunKind = "default" | "heartbeat" | "cron";
+```
+
+| Run Kind | Mode | Bootstrap Files Loaded |
+|----------|------|----------------------|
+| Default (main session) | full | All workspace files |
+| Heartbeat | lightweight | Only `HEARTBEAT.md` |
+| Cron | lightweight | Empty (no bootstrap files) |
+
+**Why?** Heartbeat and cron runs are automated background tasks that don't need persona context. Loading full bootstrap for a cron job wastes tokens and adds latency. The lightweight mode cuts bootstrap overhead to near-zero for automated runs.
+
+### Bootstrap Cache Per Session Key (NEW)
+
+Bootstrap files are now cached per `sessionKey` via `getOrLoadBootstrapFiles()`:
+
+```typescript
+const cache = new Map<string, WorkspaceBootstrapFile[]>();
+// First call loads from disk, subsequent calls for same session return cached
+```
+
+**Why?** Prevents repeated filesystem I/O for the same session's bootstrap files, especially important during multi-turn conversations where bootstrap is re-evaluated on each turn.
+
+### Bootstrap Boundary Hardening (NEW)
+
+Workspace bootstrap reads now use guarded boundary-file operations:
+
+```typescript
+const opened = await openBoundaryFile({
+  absolutePath: src,
+  rootPath: seed,
+  boundaryLabel: "sandbox seed workspace",
+});
+if (!opened.ok) continue; // Fail gracefully on boundary violation
+```
+
+**Why?** Prevents symlink/directory traversal attacks when seeding sandbox workspaces. A malicious SOUL.md path like `../../../etc/passwd` is caught and rejected at the boundary check.
+
 ### Token Budget System
 
 **Two-tier budget** (`src/agents/pi-embedded-helpers/bootstrap.ts`):
@@ -207,6 +250,74 @@ const TOOL_GROUPS = {
 ```
 
 **Why profiles?** Without profiles, every agent config would need a full tool allowlist. Profiles provide semantic groupings — "this is a coding agent" vs enumerating 15 tool names.
+
+### Data-Driven Tool Catalog with Provenance (NEW)
+
+A major architectural shift replaced ad-hoc tool-policy helpers with a centralized `tool-catalog.ts` (322 LOC):
+
+```typescript
+type CoreToolDefinition = {
+  id: string;
+  label: string;
+  description: string;
+  sectionId: string;
+  profiles: ToolProfileId[];           // Which profiles include this tool
+  includeInOpenClawGroup?: boolean;
+};
+
+// 11 organized sections:
+const CORE_TOOL_SECTION_ORDER = [
+  "fs", "runtime", "web", "memory", "sessions",
+  "ui", "messaging", "automation", "nodes", "agents", "media"
+];
+```
+
+**Gateway protocol exposure:** New `gateway.tools-catalog` method lets mobile/web clients query the authoritative tool catalog dynamically, eliminating hardcoded tool lists in UIs.
+
+**Plugin-only allowlist stripping:** A safety mechanism prevents accidental lock-out when an allowlist contains only plugin tools:
+```typescript
+function stripPluginOnlyAllowlist(policy, groups, coreTools): AllowlistResolution {
+  // Returns { strippedAllowlist: true } when policy is plugin-only
+  // Prevents disabling all core tools by misconfigured plugin policies
+}
+```
+
+**Why?** Tool provenance tracking (core vs plugin, author, deprecation status) makes the tool system auditable. The gateway protocol enables dynamic rendering without embedded registries.
+
+### PDF Tool with Native Provider Support (NEW)
+
+A new PDF analysis tool supports both native document-aware and fallback extraction paths:
+
+```typescript
+// Native path: Direct API calls for Anthropic/Google
+// - Anthropic: sends raw PDF via DocumentBlockParam
+// - Google Gemini: sends PDF bytes via inlineData with application/pdf MIME
+
+// Fallback path: For providers without native PDF support
+// - Extract text via pdfjs-dist
+// - Rasterize pages to images via @napi-rs/canvas
+// - Send through vision/text completion path
+
+// Config:
+agents.defaults.pdfModel = { primary, fallbacks }  // defaults to imageModel
+agents.defaults.pdfMaxBytesMb = 10
+agents.defaults.pdfMaxPages = 20
+```
+
+**Why?** Adds document understanding without requiring model-specific integrations; leverages existing vision infrastructure with graceful fallback to text extraction.
+
+### Tool Name Normalization Hardening (NEW)
+
+Tool name validation now includes consistent whitespace trimming, alias resolution, and validation against persisted tool-call names:
+
+```typescript
+function normalizeToolName(name: string) {
+  const normalized = name.trim().toLowerCase();
+  return TOOL_NAME_ALIASES[normalized] ?? normalized;
+}
+```
+
+**Why?** Prevents manipulation via special characters or whitespace-padded tool names in tool-call transcripts.
 
 ### Prompt Mode
 
@@ -395,6 +506,91 @@ agents.defaults.subagents.model = "anthropic/claude-sonnet-4-5"
 
 **Why per-agent models?** Different tasks have different cost/quality tradeoffs. A coding agent needs the most capable model; a chat agent doing simple Q&A can use a cheaper model.
 
+#### 4. Centralized Fallback Resolution (NEW)
+
+Fallback logic was unified into a single resolution engine with explicit cooldown/auth handling:
+
+```typescript
+function resolveFallbackCandidates(params: {
+  cfg: OpenClawConfig;
+  provider: string;
+  model: string;
+  fallbacksOverride?: string[];  // Per-agent or per-job override
+}): ModelCandidate[]
+// 1. Normalize primary to configured defaults
+// 2. Resolve configured fallback chain or explicit override
+// 3. Deduplicate by modelKey(provider, model)
+// 4. Skip allowlist enforcement (fallbacks are explicit user intent)
+```
+
+**Cooldown decision logic:**
+```typescript
+type CooldownDecision =
+  | { type: "skip"; reason: FailoverReason; error: string }
+  | { type: "attempt"; reason: FailoverReason; markProbe: boolean }
+
+// Key behaviors:
+// - Primary model retried periodically during cooldown (30s min, configurable)
+// - Entire provider skipped if auth/billing issues on all profiles
+// - Same-provider rate-limit failures can fall back to sibling models
+// - Per-agent fallbacksOverride replaces global config
+```
+
+**Default fallback:** Agents without explicit model config now fall back to `agents.defaults.model`, ensuring unspecified agents don't fail immediately.
+
+**Why centralized?** Previously, fallback logic was scattered across multiple call sites. Centralization ensures consistent cooldown awareness, probe throttling, and override support.
+
+#### 5. Adaptive Thinking for Claude 4.6 (NEW)
+
+A new thinking mode supports Anthropic's recommended dynamic allocation:
+
+```typescript
+type ThinkLevel =
+  | "off" | "minimal" | "low" | "medium" | "high" | "xhigh"
+  | "adaptive";  // NEW
+
+agents.defaults.thinkingDefault = "adaptive"  // Claude 4.6 default
+```
+
+**Provider mappings:**
+- Anthropic: `{ thinking: { type: "adaptive" }, output_config: { effort: "medium" } }`
+- OpenRouter: `"adaptive"` → `reasoning.effort: "medium"`
+- Google: `"adaptive"` → `thinkingLevel: "MEDIUM"`
+
+**Unified thinking precedence:**
+1. Per-request override (user command)
+2. Per-agent config
+3. Per-model defaults (model catalog)
+4. Global `agents.defaults.thinkingDefault`
+
+**Why?** Adaptive mode avoids the deprecated `budget_tokens` field on newer models. It provides a single setting that works across all supported providers.
+
+#### 6. Reasoning Preservation in Fallback (NEW)
+
+Thinking/reasoning configuration is now mapped through the failover chain:
+
+```typescript
+// Problem: Fallback to different provider loses thinking payload structure
+// Solution: Map reasoning config through failover to maintain requested thinking levels
+```
+
+**Why?** Extended thinking (Claude, DeepSeek, etc.) should remain available even when the primary model fails over. Without reasoning preservation, a fallback would silently drop the user's requested thinking level.
+
+#### 7. OpenRouter Reasoning Injection Guards (NEW)
+
+Certain models don't support reasoning.effort injection:
+
+```typescript
+function isOpenRouterReasoningUnsupported(modelId: string): boolean {
+  return modelId.toLowerCase().startsWith("x-ai/");  // Grok models
+}
+
+// Also: openrouter/auto routing model skips reasoning injection
+const skipReasoningInjection = modelId === "auto" || isOpenRouterReasoningUnsupported(modelId);
+```
+
+**Why?** Prevents 400-level API errors on models with incompatible reasoning requirements.
+
 ### Channel Router
 
 OpenClaw routes inbound messages to the correct agent using tiered binding resolution:
@@ -411,6 +607,55 @@ Tier 8: default                (default agent)
 ```
 
 **Most-specific wins.** A message from a specific person in a specific Discord guild with a specific role matches Tier 3 before falling through to Tier 4.
+
+### Compaction Enhancements (NEW)
+
+Three significant compaction improvements were added:
+
+#### Identifier Preservation in Summaries
+
+Compaction summaries previously lost/mangled opaque identifiers (IDs, hashes, URLs). A new policy ensures they survive:
+
+```typescript
+const IDENTIFIER_PRESERVATION_INSTRUCTIONS =
+  "Preserve all opaque identifiers exactly as written (no shortening or reconstruction), " +
+  "including UUIDs, hashes, IDs, tokens, API keys, hostnames, IPs, ports, URLs, and file names.";
+
+// Config:
+agents.defaults.compaction.identifierPolicy = "strict" | "off" | "custom"  // default: "strict"
+agents.defaults.compaction.identifierInstructions?: string  // custom instructions
+```
+
+**Why?** Without identifier preservation, summaries lose references to resources, sessions, and users — making them useless for follow-up actions.
+
+#### Tool Result Details Exclusion
+
+Tool result `.details` payloads are stripped from token accounting:
+
+```typescript
+function estimateMessagesTokens(messages: AgentMessage[]): number {
+  // SECURITY: toolResult.details can contain untrusted/verbose payloads
+  const safe = stripToolResultDetails(messages);
+  return safe.reduce((sum, msg) => sum + estimateTokens(msg), 0);
+}
+```
+
+**Why?** Adversarial tool outputs (huge responses) could inflate token counts and trigger premature compaction. Details also never reach the LLM during compaction via separate sanitization.
+
+#### OpenAI Responses Server-Side Compaction
+
+Auto-enabled for OpenAI Responses API models:
+
+```typescript
+function shouldEnableOpenAIResponsesServerCompaction(model, extraParams): boolean {
+  if (configured === false) return false;          // Explicit opt-out
+  if (!shouldForceResponsesStore(model)) return false;
+  if (configured === true) return true;            // Explicit opt-in
+  return model.provider === "openai";              // Auto-enable for direct OpenAI
+}
+```
+
+**Why?** Offloads compaction work from the gateway to OpenAI's infrastructure, reducing compute overhead.
 
 ---
 
@@ -489,6 +734,136 @@ Main Agent (depth 0)
 - Global sub-agent lane: 8 (default)
 - Children per session: 5 (default)
 
+### ACP Thread-Bound Agents (NEW)
+
+Anthropic Cloud Platform (ACP) support enables agents bound to platform threads (e.g., Discord threads):
+
+- **ACP Runtime Registration:** Plugin backend infrastructure for `acpx` runtime
+- **Unified Dispatch:** ACP sessions routed through core dispatch + lifecycle cleanup
+- **Target Validation:** Require explicit ACP target for runtime spawns (prevents cross-tenant leaks)
+- **Metadata Seeding:** Persisted metadata for all ACP spawns
+
+**Why?** Thread-bound agents provide conversation-scoped instances without session proliferation, with improved isolation and cleanup semantics.
+
+### sessions_spawn Sandbox Require Mode (NEW)
+
+Sub-agent spawning now supports a `sandbox` parameter:
+
+```typescript
+const SESSIONS_SPAWN_SANDBOX_MODES = ["inherit", "require"] as const;
+
+// "inherit": use parent's sandbox mode (default, backward-compatible)
+// "require": fail if parent is not in sandbox (enforces sandboxing)
+```
+
+**Why?** Prevents privilege escalation — a sandboxed parent can enforce that all children also run sandboxed.
+
+---
+
+## New Provider Integrations (NEW)
+
+### Volcengine/Byteplus Coding-Plan Auth Scoping
+
+Coding-plan model variants (`volcengine-plan`, `byteplus-plan`) use different provider IDs than their auth credentials. A scoped normalization ensures they leverage the base provider's stored credentials:
+
+```typescript
+function normalizeProviderIdForAuth(provider: string): string {
+  if (provider === "volcengine-plan") return "volcengine";
+  if (provider === "byteplus-plan") return "byteplus";
+  return provider;
+}
+```
+
+### Kimi Web Search
+
+Moonshot Kimi added as a fourth web search provider with auto-detection:
+
+```typescript
+// Auto-detection priority: Brave → Gemini → Perplexity → Grok → Kimi
+tools.webSearch.kimi.apiKey = ${KIMI_API_KEY}
+```
+
+### Gemini Google Search Grounding
+
+Gemini can now use Google Search grounding to fetch web results:
+
+```typescript
+// Uses Gemini's tools API with Google Search tool
+// Resolves grounding redirect URLs via parallel HEAD requests (5s timeout)
+// Returns citations alongside results
+agents.defaults.tools.webSearch.gemini.model = "gemini-2.5-flash"  // default
+```
+
+**Why?** Enables free/cheap web search via Gemini's Google integration — no separate search service subscription needed.
+
+### OpenRouter "Any Model ID" Pass-Through
+
+OpenRouter no longer restricted to a hardcoded prefix list. Any valid OpenRouter model ID is now accepted:
+
+```typescript
+// If model not found in local catalog, create on-the-fly with conservative defaults
+if (provider === "openrouter" && !found) {
+  return { provider: "openrouter", id: modelId, contextWindow: 32_000, maxTokens: 4_000 };
+}
+```
+
+**Why?** Users can immediately use newly-released OpenRouter models without waiting for catalog updates.
+
+### OpenRouter Caching & Attribution
+
+- **System message caching:** Injects `cache_control: { type: "ephemeral" }` on system prompts for Anthropic models on OpenRouter
+- **App attribution:** Sends `HTTP-Referer: https://openclaw.ai` and `X-Title: OpenClaw` headers
+
+### Z.AI Tool Stream
+
+Z.AI provider supports `tool_stream: true` for real-time tool call streaming (enabled by default).
+
+### Google Thinking Payload Sanitization
+
+Guards against invalid negative `thinkingBudget` values that `pi-ai` emits for some Gemini 3.1 model IDs. Negative budgets are silently removed before API calls.
+
+---
+
+## Security Hardening (NEW)
+
+### Docker Browser Container Chromium Flags
+
+Hardened browser sandbox environment with strict Chromium flags — disables plugins, extensions, and enforces sandboxing with restricted feature policies.
+
+### Private-Network Web Search Citation Blocking
+
+Prevents the `web_search` tool from returning results pointing to private network addresses:
+
+```
+Blocked: 127.0.0.1, localhost, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, IPv6 private ranges
+```
+
+**Why?** Prevents SSRF escalation via search result citations that redirect to internal services.
+
+### Workspace Bootstrap Boundary Enforcement
+
+All sandbox workspace seeding now uses `openBoundaryFile()` guards (covered in Bootstrap Boundary Hardening above).
+
+---
+
+## StreamFn Wrapper Pipeline (NEW)
+
+Provider-specific payload mutations are composed via higher-order streaming function wrappers in `extra-params.ts`:
+
+```
+agent.streamFn
+  ├── createStreamFnWithExtraParams       — Temperature, maxTokens, transport
+  ├── createAnthropicBetaHeadersWrapper   — Beta headers (1M context, OAuth)
+  ├── createOpenRouterWrapper             — App headers, reasoning.effort
+  ├── createOpenRouterSystemCacheWrapper  — System message cache_control
+  ├── createGoogleThinkingPayloadWrapper  — Gemini thinking config sanitization
+  ├── createOpenAIResponsesContextManagementWrapper  — Server-side compaction
+  ├── createZaiToolStreamWrapper          — tool_stream parameter
+  └── createBedrockNoCacheWrapper         — Disable cache for non-Anthropic Bedrock
+```
+
+**Why?** Clean separation of provider-specific concerns. Each wrapper is independently testable and composable. Adding a new provider requires only a new wrapper, not changes to the core pipeline.
+
 ---
 
 ## Design Principles & Rationale Summary
@@ -514,6 +889,15 @@ Auth rotation with exponential backoff, model fallback chains, token budget trun
 ### 7. Defense in Depth for Tools
 8 layers of tool filtering ensure no tool reaches the LLM without passing through profile checks, group policies, depth restrictions, sandbox rules, owner gating, and hook inspection.
 
+### 8. Composable Provider Wrappers (NEW)
+StreamFn wrappers chain provider-specific payload mutations without coupling providers to each other. Each wrapper is independently testable.
+
+### 9. Centralized Fallback with Cooldown Awareness (NEW)
+Unified fallback resolution with probe throttling, provider-level auth awareness, and per-agent overrides ensures reliability without cascading failures.
+
+### 10. Identifier-Preserving Compaction (NEW)
+Summaries preserve opaque identifiers (UUIDs, URLs, hashes) so compacted context remains actionable for follow-up operations.
+
 ---
 
 ## Relevance to Personal Agent Project
@@ -530,5 +914,11 @@ This architecture validates several patterns we should adopt:
 | Model fallback + auth rotation | Cost optimization (use cheaper models for routine tasks) |
 | Sub-agent spawning | Delegate to other employees' agents via AgentHub |
 | Session key routing | Route A2A messages to correct employee agent |
+| Data-driven tool catalog | Dynamic tool registry exposed via API for all UIs |
+| Centralized model fallback | Reliable multi-provider orchestration with cooldown awareness |
+| Adaptive thinking | Cost-optimized reasoning that adapts to task complexity |
+| Identifier-preserving compaction | Summaries remain actionable for project reference tracking |
+| StreamFn wrapper pipeline | Composable provider integrations without coupling |
+| Sandbox require mode | Enforce security boundaries in delegated agent chains |
 
 The key difference: OpenClaw's agents serve *one person across many channels*. Our personal agent network has *many agents (one per employee) collaborating across a shared hub*.

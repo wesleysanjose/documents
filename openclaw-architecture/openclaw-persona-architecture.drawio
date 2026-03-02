@@ -1,1 +1,322 @@
-<mxfile host="app.diagrams.net"><diagram id="blank" name="Page-1"><mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/></root></mxGraphModel></diagram></mxfile>
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="title" value="OpenClaw Agent Persona &amp; Specialization Architecture" style="text;fontSize=16;fontStyle=1;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="80" y="8" width="640" height="28" as="geometry"/>
+    </mxCell>
+
+    <!-- Legend -->
+    <mxCell id="leg1" value="OpenClaw" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="42" width="70" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="Pi Core" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="118" y="42" width="70" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="User Files" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="196" y="42" width="70" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="NEW" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="274" y="42" width="50" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 1: Persona & Identity -->
+    <mxCell id="l1-bg" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;opacity=25;" vertex="1" parent="1">
+      <mxGeometry x="40" y="72" width="720" height="78" as="geometry"/>
+    </mxCell>
+    <mxCell id="l1-label" value="Layer 1: Persona &amp; Identity (User-Authored Workspace Files)" style="text;fontSize=11;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="48" y="74" width="380" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="soul" value="SOUL.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="95" width="80" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="identity" value="IDENTITY.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="138" y="95" width="85" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="agents-md" value="AGENTS.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="231" y="95" width="80" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="tools-md" value="TOOLS.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="319" y="95" width="75" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="user-md" value="USER.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="402" y="95" width="72" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="heartbeat-md" value="HEARTBEAT.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="482" y="95" width="95" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="bootstrap-md" value="BOOTSTRAP.md" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="585" y="95" width="95" height="32" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary-new" value="Boundary&#10;Guard" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="690" y="95" width="60" height="32" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 2: Agent Config -->
+    <mxCell id="l2-bg" value="" style="rounded=1;fillColor=#f5f5f5;strokeColor=#999999;opacity=25;" vertex="1" parent="1">
+      <mxGeometry x="40" y="160" width="720" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="l2-label" value="Layer 2: Agent Configuration (openclaw.yaml)" style="text;fontSize=11;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="48" y="162" width="320" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="agent-config" value="AgentConfig" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="183" width="85" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="tool-profile" value="Tool Profiles
+min/code/msg/full" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="143" y="183" width="100" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="tool-catalog-new" value="Tool Catalog
++Provenance" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="251" y="183" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="prompt-mode" value="Prompt Mode
+full/min/none" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="349" y="183" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ctx-mode-new" value="Context Mode
+full/lightweight" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="447" y="183" width="95" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="sandbox-cfg" value="Sandbox
+Config" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="550" y="183" width="72" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="sandbox-req-new" value="Sandbox
+Require" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="630" y="183" width="65" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="subagent-cfg" value="SubagentConfig" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="220" width="100" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="heartbeat-cfg" value="HeartbeatConfig" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="158" y="220" width="100" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="id-policy-new" value="Compaction: identifierPolicy" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="266" y="220" width="165" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="think-cfg-new" value="thinkingDefault: adaptive" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="439" y="220" width="155" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 3: OpenClaw Runtime -->
+    <mxCell id="l3-bg" value="" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;opacity=15;" vertex="1" parent="1">
+      <mxGeometry x="40" y="260" width="720" height="195" as="geometry"/>
+    </mxCell>
+    <mxCell id="l3-label" value="Layer 3: OpenClaw Runtime (Orchestration)" style="text;fontSize=11;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="48" y="262" width="320" height="16" as="geometry"/>
+    </mxCell>
+
+    <!-- System Prompt Row -->
+    <mxCell id="sys-prompt" value="System Prompt Builder
+(26 Sections)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="50" y="284" width="140" height="34" as="geometry"/>
+    </mxCell>
+    <mxCell id="bootstrap-inj" value="Bootstrap
+Injector" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="200" y="284" width="80" height="34" as="geometry"/>
+    </mxCell>
+    <mxCell id="bootstrap-cache-new" value="Bootstrap
+Cache" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="288" y="284" width="65" height="34" as="geometry"/>
+    </mxCell>
+    <mxCell id="channel-router" value="Channel Router
+(8-Tier Binding)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="361" y="284" width="115" height="34" as="geometry"/>
+    </mxCell>
+
+    <!-- Tool Policy Row -->
+    <mxCell id="tool-policy" value="8-Layer Tool Policy Pipeline" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=center;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="50" y="326" width="185" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pdf-tool-new" value="PDF Tool
+Native+Fallback" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="243" y="326" width="100" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="owner-gate" value="Owner-Only
+Gating" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="351" y="326" width="78" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="tool-hooks" value="Tool Hooks
++Normalization" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="437" y="326" width="95" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Model Orchestration Row -->
+    <mxCell id="model-orch" value="Model Orchestration" style="text;fontSize=10;fontStyle=5;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="50" y="362" width="130" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="auth-rotate" value="Auth Profile
+Rotation" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="378" width="80" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fallback-new" value="Centralized
+Fallback" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="138" y="378" width="78" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="cooldown-new" value="Cooldown
++Probe" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="224" y="378" width="68" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="adaptive-new" value="Adaptive
+Thinking" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="378" width="72" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="reason-new" value="Reasoning
+Preserve" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="380" y="378" width="72" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Compaction Row -->
+    <mxCell id="compact-label" value="Compaction" style="text;fontSize=10;fontStyle=5;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="50" y="414" width="80" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact-id-new" value="Identifier
+Preservation" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="430" width="82" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact-strip-new" value="Tool Details
+Exclusion" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="140" y="430" width="82" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact-oai-new" value="OpenAI Server
+Compaction" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="230" y="430" width="90" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- StreamFn Wrappers (right side) -->
+    <mxCell id="stream-label" value="StreamFn Wrappers" style="text;fontSize=10;fontStyle=5;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="545" y="262" width="130" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="stream-bg-new" value="" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;opacity=30;" vertex="1" parent="1">
+      <mxGeometry x="540" y="278" width="210" height="176" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw1" value="ExtraParams" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="548" y="284" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw2" value="Anthropic Beta" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="648" y="284" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw3" value="OpenRouter" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="548" y="310" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw4" value="OR SysCache" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="648" y="310" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw5" value="Google Think" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="548" y="336" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw6" value="OAI Responses" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="648" y="336" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw7" value="Z.AI ToolStream" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="548" y="362" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw8" value="Bedrock NoCache" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="648" y="362" width="92" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- Security (bottom of runtime) -->
+    <mxCell id="sec-label" value="Security" style="text;fontSize=10;fontStyle=5;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="545" y="386" width="60" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec-chromium" value="Docker Chromium" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="548" y="402" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec-ssrf" value="Private-Net Block" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="648" y="402" width="92" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec-toolname" value="Tool Name Norm" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" vertex="1" parent="1">
+      <mxGeometry x="548" y="428" width="92" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- Layer 4: Pi Agent Core -->
+    <mxCell id="l4-bg" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;opacity=20;" vertex="1" parent="1">
+      <mxGeometry x="40" y="465" width="720" height="58" as="geometry"/>
+    </mxCell>
+    <mxCell id="l4-label" value="Layer 4: Pi Agent Core (LLM Execution Engine)" style="text;fontSize=11;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="48" y="467" width="320" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="agent-class" value="Agent.prompt()
+steer → followUp" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="488" width="105" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="agent-tool-if" value="AgentTool
+Interface" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="163" y="488" width="80" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="get-model" value="getModel()" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="251" y="488" width="80" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="session-mgr" value="SessionManager" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="339" y="488" width="95" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="agent-events" value="AgentEvent
+Stream" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="442" y="488" width="80" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="acp-new" value="ACP Thread
+Bound" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="530" y="488" width="78" height="28" as="geometry"/>
+    </mxCell>
+
+    <!-- Providers Row -->
+    <mxCell id="prov-bg" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=25;" vertex="1" parent="1">
+      <mxGeometry x="40" y="533" width="720" height="58" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-label" value="Providers" style="text;fontSize=11;fontStyle=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="48" y="535" width="80" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-anthropic" value="Anthropic" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="50" y="556" width="68" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-openai" value="OpenAI" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="126" y="556" width="60" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-google" value="Google" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="194" y="556" width="60" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-or" value="OpenRouter
+(Any Model)" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="262" y="556" width="78" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-bedrock" value="Bedrock" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=center;" vertex="1" parent="1">
+      <mxGeometry x="348" y="556" width="58" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-volc-new" value="Volcengine" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="414" y="556" width="68" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-kimi-new" value="Kimi" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="490" y="556" width="48" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-gemini-new" value="Gemini
+Search" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="546" y="556" width="60" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-zai-new" value="Z.AI" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="614" y="556" width="48" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="prov-byteplus-new" value="Byteplus" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="670" y="556" width="60" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- Key Edges: Layer connections -->
+    <mxCell id="e1" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.15;entryY=0;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="soul" target="sys-prompt">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#999999;" edge="1" parent="1" source="tool-profile" target="tool-policy">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="sys-prompt" target="agent-class">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#b85450;" edge="1" parent="1" source="tool-policy" target="agent-tool-if">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="endArrow=classic;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#d6b656;" edge="1" parent="1" source="fallback-new" target="get-model">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
