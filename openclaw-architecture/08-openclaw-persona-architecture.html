@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Agent Persona & Specialization Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; color: #1a1a1a; line-height: 1.6; }
+    .header { background: #1e293b; color: #fff; padding: 24px 40px; }
+    .header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.01em; }
+    .diagram-section { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 32px 40px; overflow-x: auto; }
+    .diagram-section h2 { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 20px; }
+    .diagram-wrap { display: flex; justify-content: center; }
+    .diagram-wrap svg { max-width: 100%; height: auto; }
+    .content { max-width: 960px; margin: 0 auto; padding: 40px; }
+    .content h1 { font-size: 1.8rem; font-weight: 700; margin: 32px 0 12px; color: #0f172a; }
+    .content h2 { font-size: 1.3rem; font-weight: 600; margin: 28px 0 10px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+    .content h3 { font-size: 1.05rem; font-weight: 600; margin: 20px 0 8px; color: #334155; }
+    .content h4 { font-size: 0.95rem; font-weight: 600; margin: 16px 0 6px; color: #475569; }
+    .content p { margin: 8px 0 12px; }
+    .content ul, .content ol { margin: 8px 0 12px 24px; }
+    .content li { margin: 4px 0; }
+    .content pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; font-size: 0.82rem; line-height: 1.5; }
+    .content code { background: #f1f5f9; color: #0f172a; padding: 2px 5px; border-radius: 4px; font-size: 0.85em; }
+    .content pre code { background: none; color: inherit; padding: 0; }
+    .content table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+    .content th { background: #f1f5f9; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #cbd5e1; }
+    .content td { padding: 8px 12px; border: 1px solid #e2e8f0; }
+    .content tr:nth-child(even) td { background: #f8fafc; }
+    .content hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
+    .content blockquote { border-left: 3px solid #94a3b8; padding-left: 16px; color: #475569; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>OpenClaw Agent Persona & Specialization Architecture</h1>
+  </div>
+  <div class="diagram-section">
+    <h2>Architecture Diagram</h2>
+    <div class="diagram-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" style="background: transparent; background-color: transparent; color-scheme: light dark;" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="729px" height="584px" viewBox="0 0 729 584"><defs/><g><g data-cell-id="0"><g data-cell-id="1"><g data-cell-id="title"><g transform="translate(0.5,0.5)"><rect x="47" y="0" width="640" height="28" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="16px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="367" y="22">OpenClaw Agent Persona &amp; Specialization Architecture</text></g></g></g><g data-cell-id="leg1"><g transform="translate(0.5,0.5)"><rect x="7" y="34" width="70" height="20" rx="3" ry="3" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="42" y="47.5">OpenClaw</text></g></g></g><g data-cell-id="leg2"><g transform="translate(0.5,0.5)"><rect x="85" y="34" width="70" height="20" rx="3" ry="3" fill="#e1d5e7" stroke="#9673a6" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="120" y="47.5">Pi Core</text></g></g></g><g data-cell-id="leg3"><g transform="translate(0.5,0.5)"><rect x="163" y="34" width="70" height="20" rx="3" ry="3" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="198" y="47.5">User Files</text></g></g></g><g data-cell-id="leg4"><g transform="translate(0.5,0.5)"><rect x="241" y="34" width="50" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="266" y="47.5">NEW</text></g></g></g><g data-cell-id="l1-bg"><g transform="translate(0.5,0.5)"><rect x="7" y="64" width="720" height="78" rx="11.7" ry="11.7" fill-opacity="0.25" fill="#d5e8d4" stroke="#82b366" stroke-opacity="0.25" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g></g><g data-cell-id="l1-label"><g transform="translate(0.5,0.5)"><rect x="15" y="66" width="380" height="16" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" font-size="11px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="17" y="83">Layer 1: Persona &amp; Identity (User-Authored Workspace Files)</text></g></g></g><g data-cell-id="soul"><g transform="translate(0.5,0.5)"><rect x="17" y="87" width="80" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="57" y="107">SOUL.md</text></g></g></g><g data-cell-id="identity"><g transform="translate(0.5,0.5)"><rect x="105" y="87" width="85" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="147.5" y="107">IDENTITY.md</text></g></g></g><g data-cell-id="agents-md"><g transform="translate(0.5,0.5)"><rect x="198" y="87" width="80" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="238" y="107">AGENTS.md</text></g></g></g><g data-cell-id="tools-md"><g transform="translate(0.5,0.5)"><rect x="286" y="87" width="75" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="323.5" y="107">TOOLS.md</text></g></g></g><g data-cell-id="user-md"><g transform="translate(0.5,0.5)"><rect x="369" y="87" width="72" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="405" y="107">USER.md</text></g></g></g><g data-cell-id="heartbeat-md"><g transform="translate(0.5,0.5)"><rect x="449" y="87" width="95" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="496.5" y="107">HEARTBEAT.md</text></g></g></g><g data-cell-id="bootstrap-md"><g transform="translate(0.5,0.5)"><rect x="552" y="87" width="95" height="32" rx="4.8" ry="4.8" fill="#d5e8d4" stroke="#82b366" stroke-dasharray="3 3" pointer-events="all" style="fill: light-dark(rgb(213, 232, 212), rgb(31, 47, 30)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="599.5" y="107">BOOTSTRAP.md</text></g></g></g><g data-cell-id="boundary-new"><g transform="translate(0.5,0.5)"><rect x="657" y="87" width="60" height="32" rx="4.8" ry="4.8" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="687" y="101">Boundary</text><text x="687" y="112">Guard</text></g></g></g><g data-cell-id="l2-bg"><g transform="translate(0.5,0.5)"><rect x="7" y="152" width="720" height="90" rx="13.5" ry="13.5" fill-opacity="0.25" fill="#f5f5f5" stroke="#999999" stroke-opacity="0.25" pointer-events="all" style="fill: light-dark(rgb(245, 245, 245), rgb(26, 26, 26)); stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/></g></g><g data-cell-id="l2-label"><g transform="translate(0.5,0.5)"><rect x="15" y="154" width="320" height="16" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" font-size="11px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="17" y="171">Layer 2: Agent Configuration (openclaw.yaml)</text></g></g></g><g data-cell-id="agent-config"><g transform="translate(0.5,0.5)"><rect x="17" y="175" width="85" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="59.5" y="194">AgentConfig</text></g></g></g><g data-cell-id="tool-profile"><g transform="translate(0.5,0.5)"><rect x="110" y="175" width="100" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="160" y="193.5">Tool Profiles min/code/msg/full</text></g></g></g><g data-cell-id="tool-catalog-new"><g transform="translate(0.5,0.5)"><rect x="218" y="175" width="90" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="263" y="193.5">Tool Catalog +Provenance</text></g></g></g><g data-cell-id="prompt-mode"><g transform="translate(0.5,0.5)"><rect x="316" y="175" width="90" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="361" y="193.5">Prompt Mode full/min/none</text></g></g></g><g data-cell-id="ctx-mode-new"><g transform="translate(0.5,0.5)"><rect x="414" y="175" width="95" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="461.5" y="193.5">Context Mode full/lightweight</text></g></g></g><g data-cell-id="sandbox-cfg"><g transform="translate(0.5,0.5)"><rect x="517" y="175" width="72" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="553" y="193.5">Sandbox Config</text></g></g></g><g data-cell-id="sandbox-req-new"><g transform="translate(0.5,0.5)"><rect x="597" y="175" width="65" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="629.5" y="193.5">Sandbox Require</text></g></g></g><g data-cell-id="subagent-cfg"><g transform="translate(0.5,0.5)"><rect x="17" y="212" width="100" height="24" rx="3.6" ry="3.6" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="67" y="227.5">SubagentConfig</text></g></g></g><g data-cell-id="heartbeat-cfg"><g transform="translate(0.5,0.5)"><rect x="125" y="212" width="100" height="24" rx="3.6" ry="3.6" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="175" y="227.5">HeartbeatConfig</text></g></g></g><g data-cell-id="id-policy-new"><g transform="translate(0.5,0.5)"><rect x="233" y="212" width="165" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="315.5" y="227.5">Compaction: identifierPolicy</text></g></g></g><g data-cell-id="think-cfg-new"><g transform="translate(0.5,0.5)"><rect x="406" y="212" width="155" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="483.5" y="227.5">thinkingDefault: adaptive</text></g></g></g><g data-cell-id="l3-bg"><g transform="translate(0.5,0.5)"><rect x="7" y="252" width="720" height="195" rx="29.25" ry="29.25" fill-opacity="0.15" fill="#f8cecc" stroke="#b85450" stroke-opacity="0.15" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g></g><g data-cell-id="l3-label"><g transform="translate(0.5,0.5)"><rect x="15" y="254" width="320" height="16" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" font-size="11px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="17" y="271">Layer 3: OpenClaw Runtime (Orchestration)</text></g></g></g><g data-cell-id="sys-prompt"><g transform="translate(0.5,0.5)"><rect x="17" y="276" width="140" height="34" rx="5.1" ry="5.1" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="87" y="297">System Prompt Builder (26 Sections)</text></g></g></g><g data-cell-id="bootstrap-inj"><g transform="translate(0.5,0.5)"><rect x="167" y="276" width="80" height="34" rx="5.1" ry="5.1" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="207" y="297">Bootstrap Injector</text></g></g></g><g data-cell-id="bootstrap-cache-new"><g transform="translate(0.5,0.5)"><rect x="255" y="276" width="65" height="34" rx="5.1" ry="5.1" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="287.5" y="296.5">Bootstrap Cache</text></g></g></g><g data-cell-id="channel-router"><g transform="translate(0.5,0.5)"><rect x="328" y="276" width="115" height="34" rx="5.1" ry="5.1" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="385.5" y="297">Channel Router (8-Tier Binding)</text></g></g></g><g data-cell-id="tool-policy"><g transform="translate(0.5,0.5)"><rect x="17" y="318" width="185" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="109.5" y="337">8-Layer Tool Policy Pipeline</text></g></g></g><g data-cell-id="pdf-tool-new"><g transform="translate(0.5,0.5)"><rect x="210" y="318" width="100" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="260" y="336.5">PDF Tool Native+Fallback</text></g></g></g><g data-cell-id="owner-gate"><g transform="translate(0.5,0.5)"><rect x="318" y="318" width="78" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="357" y="336.5">Owner-Only Gating</text></g></g></g><g data-cell-id="tool-hooks"><g transform="translate(0.5,0.5)"><rect x="404" y="318" width="95" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="451.5" y="336.5">Tool Hooks +Normalization</text></g></g></g><g data-cell-id="model-orch"><g transform="translate(0.5,0.5)"><rect x="17" y="354" width="130" height="14" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-decoration="underline" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="19" y="370">Model Orchestration</text></g></g></g><g data-cell-id="auth-rotate"><g transform="translate(0.5,0.5)"><rect x="17" y="370" width="80" height="30" rx="4.5" ry="4.5" fill="#f8cecc" stroke="#b85450" pointer-events="all" style="fill: light-dark(rgb(248, 206, 204), rgb(81, 45, 43)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="57" y="388.5">Auth Profile Rotation</text></g></g></g><g data-cell-id="fallback-new"><g transform="translate(0.5,0.5)"><rect x="105" y="370" width="78" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="144" y="388.5">Centralized Fallback</text></g></g></g><g data-cell-id="cooldown-new"><g transform="translate(0.5,0.5)"><rect x="191" y="370" width="68" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="225" y="388.5">Cooldown +Probe</text></g></g></g><g data-cell-id="adaptive-new"><g transform="translate(0.5,0.5)"><rect x="267" y="370" width="72" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="303" y="388.5">Adaptive Thinking</text></g></g></g><g data-cell-id="reason-new"><g transform="translate(0.5,0.5)"><rect x="347" y="370" width="72" height="30" rx="4.5" ry="4.5" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="383" y="388.5">Reasoning Preserve</text></g></g></g><g data-cell-id="compact-label"><g transform="translate(0.5,0.5)"><rect x="17" y="406" width="80" height="14" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-decoration="underline" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="19" y="422">Compaction</text></g></g></g><g data-cell-id="compact-id-new"><g transform="translate(0.5,0.5)"><rect x="17" y="422" width="82" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="58" y="437.5">Identifier Preservation</text></g></g></g><g data-cell-id="compact-strip-new"><g transform="translate(0.5,0.5)"><rect x="107" y="422" width="82" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="148" y="437.5">Tool Details Exclusion</text></g></g></g><g data-cell-id="compact-oai-new"><g transform="translate(0.5,0.5)"><rect x="197" y="422" width="90" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="242" y="437.5">OpenAI Server Compaction</text></g></g></g><g data-cell-id="stream-label"><g transform="translate(0.5,0.5)"><rect x="512" y="254" width="130" height="14" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-decoration="underline" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="514" y="270">StreamFn Wrappers</text></g></g></g><g data-cell-id="stream-bg-new"><g transform="translate(0.5,0.5)"><rect x="507" y="270" width="210" height="176" rx="26.4" ry="26.4" fill-opacity="0.3" fill="#fff2cc" stroke="#d6b656" stroke-opacity="0.3" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g></g><g data-cell-id="sw1"><g transform="translate(0.5,0.5)"><rect x="515" y="276" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="561" y="289">ExtraParams</text></g></g></g><g data-cell-id="sw2"><g transform="translate(0.5,0.5)"><rect x="615" y="276" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="661" y="289">Anthropic Beta</text></g></g></g><g data-cell-id="sw3"><g transform="translate(0.5,0.5)"><rect x="515" y="302" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="561" y="315">OpenRouter</text></g></g></g><g data-cell-id="sw4"><g transform="translate(0.5,0.5)"><rect x="615" y="302" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="661" y="315">OR SysCache</text></g></g></g><g data-cell-id="sw5"><g transform="translate(0.5,0.5)"><rect x="515" y="328" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="561" y="341">Google Think</text></g></g></g><g data-cell-id="sw6"><g transform="translate(0.5,0.5)"><rect x="615" y="328" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="661" y="341">OAI Responses</text></g></g></g><g data-cell-id="sw7"><g transform="translate(0.5,0.5)"><rect x="515" y="354" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="561" y="367">Z.AI ToolStream</text></g></g></g><g data-cell-id="sw8"><g transform="translate(0.5,0.5)"><rect x="615" y="354" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="661" y="367">Bedrock NoCache</text></g></g></g><g data-cell-id="sec-label"><g transform="translate(0.5,0.5)"><rect x="512" y="378" width="60" height="14" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-decoration="underline" font-size="10px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="514" y="394">Security</text></g></g></g><g data-cell-id="sec-chromium"><g transform="translate(0.5,0.5)"><rect x="515" y="394" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="561" y="407">Docker Chromium</text></g></g></g><g data-cell-id="sec-ssrf"><g transform="translate(0.5,0.5)"><rect x="615" y="394" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="661" y="407">Private-Net Block</text></g></g></g><g data-cell-id="sec-toolname"><g transform="translate(0.5,0.5)"><rect x="515" y="420" width="92" height="20" rx="3" ry="3" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="561" y="433">Tool Name Norm</text></g></g></g><g data-cell-id="l4-bg"><g transform="translate(0.5,0.5)"><rect x="7" y="457" width="720" height="58" rx="8.7" ry="8.7" fill-opacity="0.2" fill="#e1d5e7" stroke="#9673a6" stroke-opacity="0.2" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g></g><g data-cell-id="l4-label"><g transform="translate(0.5,0.5)"><rect x="15" y="459" width="320" height="16" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" font-size="11px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="17" y="476">Layer 4: Pi Agent Core (LLM Execution Engine)</text></g></g></g><g data-cell-id="agent-class"><g transform="translate(0.5,0.5)"><rect x="17" y="480" width="105" height="28" rx="4.2" ry="4.2" fill="#e1d5e7" stroke="#9673a6" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="69.5" y="497.5">Agent.prompt() steer → followUp</text></g></g></g><g data-cell-id="agent-tool-if"><g transform="translate(0.5,0.5)"><rect x="130" y="480" width="80" height="28" rx="4.2" ry="4.2" fill="#e1d5e7" stroke="#9673a6" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="170" y="497.5">AgentTool Interface</text></g></g></g><g data-cell-id="get-model"><g transform="translate(0.5,0.5)"><rect x="218" y="480" width="80" height="28" rx="4.2" ry="4.2" fill="#e1d5e7" stroke="#9673a6" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="258" y="497.5">getModel()</text></g></g></g><g data-cell-id="session-mgr"><g transform="translate(0.5,0.5)"><rect x="306" y="480" width="95" height="28" rx="4.2" ry="4.2" fill="#e1d5e7" stroke="#9673a6" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="353.5" y="497.5">SessionManager</text></g></g></g><g data-cell-id="agent-events"><g transform="translate(0.5,0.5)"><rect x="409" y="480" width="80" height="28" rx="4.2" ry="4.2" fill="#e1d5e7" stroke="#9673a6" pointer-events="all" style="fill: light-dark(rgb(225, 213, 231), rgb(57, 47, 63)); stroke: light-dark(rgb(150, 115, 166), rgb(149, 119, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="449" y="497.5">AgentEvent Stream</text></g></g></g><g data-cell-id="acp-new"><g transform="translate(0.5,0.5)"><rect x="497" y="480" width="78" height="28" rx="4.2" ry="4.2" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="536" y="497.5">ACP Thread Bound</text></g></g></g><g data-cell-id="prov-bg"><g transform="translate(0.5,0.5)"><rect x="7" y="525" width="720" height="58" rx="8.7" ry="8.7" fill-opacity="0.25" fill="#dae8fc" stroke="#6c8ebf" stroke-opacity="0.25" pointer-events="all" style="fill: light-dark(rgb(218, 232, 252), rgb(29, 41, 59)); stroke: light-dark(rgb(108, 142, 191), rgb(92, 121, 163));"/></g></g><g data-cell-id="prov-label"><g transform="translate(0.5,0.5)"><rect x="15" y="527" width="80" height="16" fill="none" stroke="none" pointer-events="all"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" font-size="11px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="17" y="544">Providers</text></g></g></g><g data-cell-id="prov-anthropic"><g transform="translate(0.5,0.5)"><rect x="17" y="548" width="68" height="24" rx="3.6" ry="3.6" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: light-dark(rgb(218, 232, 252), rgb(29, 41, 59)); stroke: light-dark(rgb(108, 142, 191), rgb(92, 121, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="51" y="563.5">Anthropic</text></g></g></g><g data-cell-id="prov-openai"><g transform="translate(0.5,0.5)"><rect x="93" y="548" width="60" height="24" rx="3.6" ry="3.6" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: light-dark(rgb(218, 232, 252), rgb(29, 41, 59)); stroke: light-dark(rgb(108, 142, 191), rgb(92, 121, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="123" y="563.5">OpenAI</text></g></g></g><g data-cell-id="prov-google"><g transform="translate(0.5,0.5)"><rect x="161" y="548" width="60" height="24" rx="3.6" ry="3.6" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: light-dark(rgb(218, 232, 252), rgb(29, 41, 59)); stroke: light-dark(rgb(108, 142, 191), rgb(92, 121, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="191" y="563.5">Google</text></g></g></g><g data-cell-id="prov-or"><g transform="translate(0.5,0.5)"><rect x="229" y="548" width="78" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="268" y="563">OpenRouter (Any Model)</text></g></g></g><g data-cell-id="prov-bedrock"><g transform="translate(0.5,0.5)"><rect x="315" y="548" width="58" height="24" rx="3.6" ry="3.6" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: light-dark(rgb(218, 232, 252), rgb(29, 41, 59)); stroke: light-dark(rgb(108, 142, 191), rgb(92, 121, 163));"/></g><g><g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="9px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="344" y="563.5">Bedrock</text></g></g></g><g data-cell-id="prov-volc-new"><g transform="translate(0.5,0.5)"><rect x="381" y="548" width="68" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="415" y="563">Volcengine</text></g></g></g><g data-cell-id="prov-kimi-new"><g transform="translate(0.5,0.5)"><rect x="457" y="548" width="48" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="481" y="563">Kimi</text></g></g></g><g data-cell-id="prov-gemini-new"><g transform="translate(0.5,0.5)"><rect x="513" y="548" width="60" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="543" y="563">Gemini Search</text></g></g></g><g data-cell-id="prov-zai-new"><g transform="translate(0.5,0.5)"><rect x="581" y="548" width="48" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="605" y="563">Z.AI</text></g></g></g><g data-cell-id="prov-byteplus-new"><g transform="translate(0.5,0.5)"><rect x="637" y="548" width="60" height="24" rx="3.6" ry="3.6" fill="#fff2cc" stroke="#d6b656" pointer-events="all" style="fill: light-dark(rgb(255, 242, 204), rgb(40, 29, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g><g><g fill="#000000" font-family="Helvetica" font-weight="bold" text-anchor="middle" font-size="8px" style="fill: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));"><text x="667" y="563">Byteplus</text></g></g></g><g data-cell-id="e1"><g><path d="M 57 119 L 57 187.5 Q 57 197.5 47.5 197.5 L 42.75 197.5 Q 38 197.5 38 207.5 L 38 267.76" fill="none" stroke="#82b366" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/><path d="M 38 273.76 L 34 265.76 L 38 267.76 L 42 265.76 Z" fill="#82b366" stroke="#82b366" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: light-dark(rgb(130, 179, 102), rgb(68, 110, 44)); stroke: light-dark(rgb(130, 179, 102), rgb(68, 110, 44));"/></g></g><g data-cell-id="e2"><g transform="translate(0.5,0.5)"><path d="M 160 205 L 160 251.5 Q 160 261.5 150 261.5 L 119.5 261.5 Q 109.5 261.5 109.5 271.5 L 109.5 311.63" fill="none" stroke="#999999" stroke-miterlimit="10" pointer-events="stroke" style="stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/><path d="M 109.5 316.88 L 106 309.88 L 109.5 311.63 L 113 309.88 Z" fill="#999999" stroke="#999999" stroke-miterlimit="10" pointer-events="all" style="fill: light-dark(rgb(153, 153, 153), rgb(106, 106, 106)); stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/></g></g><g data-cell-id="e3"><g><path d="M 87 310 L 87 385 Q 87 395 78.25 395 L 73.88 395 Q 69.5 395 69.5 405 L 69.5 471.76" fill="none" stroke="#b85450" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/><path d="M 69.5 477.76 L 65.5 469.76 L 69.5 471.76 L 73.5 469.76 Z" fill="#b85450" stroke="#b85450" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: light-dark(rgb(184, 84, 80), rgb(215, 129, 126)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g></g><g data-cell-id="e4"><g transform="translate(0.5,0.5)"><path d="M 109.5 348 L 109.5 404 Q 109.5 414 119.5 414 L 160 414 Q 170 414 170 424 L 170 473.63" fill="none" stroke="#b85450" stroke-miterlimit="10" pointer-events="stroke" style="stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/><path d="M 170 478.88 L 166.5 471.88 L 170 473.63 L 173.5 471.88 Z" fill="#b85450" stroke="#b85450" stroke-miterlimit="10" pointer-events="all" style="fill: light-dark(rgb(184, 84, 80), rgb(215, 129, 126)); stroke: light-dark(rgb(184, 84, 80), rgb(215, 129, 126));"/></g></g><g data-cell-id="e5"><g transform="translate(0.5,0.5)"><path d="M 144 400 L 144 430 Q 144 440 154 440 L 248 440 Q 258 440 258 450 L 258 473.63" fill="none" stroke="#d6b656" stroke-miterlimit="10" pointer-events="stroke" style="stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/><path d="M 258 478.88 L 254.5 471.88 L 258 473.63 L 261.5 471.88 Z" fill="#d6b656" stroke="#d6b656" stroke-miterlimit="10" pointer-events="all" style="fill: light-dark(rgb(214, 182, 86), rgb(109, 81, 0)); stroke: light-dark(rgb(214, 182, 86), rgb(109, 81, 0));"/></g></g></g></g></g></svg>
+    </div>
+  </div>
+  <div class="content">
+    <h1>OpenClaw Agent Persona &amp; Specialization Architecture</h1>
+<h2>Overview</h2>
+<p>OpenClaw builds a comprehensive agent specialization system on top of Pi Agent Core. The architecture is organized into 4 layers, with ~85% of the code in OpenClaw and ~15% in Pi. Pi provides the raw LLM execution loop; OpenClaw provides everything that makes an agent specialized — persona, tool selection, model orchestration, and isolation.</p>
+<p>This document covers the <strong>how</strong> (implementation) and <strong>why</strong> (design rationale) for each layer.</p>
+<hr />
+<h2>Architecture Layers</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│  Layer 1: Persona &amp; Identity (user-authored workspace files)    │
+│  SOUL.md  IDENTITY.md  AGENTS.md  TOOLS.md  USER.md            │
+├─────────────────────────────────────────────────────────────────┤
+│  Layer 2: Agent Configuration (openclaw.yaml per-agent)         │
+│  AgentConfig  Tool Profile  Prompt Mode  Sub-Agent  Sandbox     │
+├─────────────────────────────────────────────────────────────────┤
+│  Layer 3: OpenClaw Runtime (orchestration above Pi)             │
+│  Bootstrap Injector → System Prompt Builder → Tool Policy (8L)  │
+│  Channel Router   Model Fallback + Auth Rotation   Plugins      │
+├── INJECTION BOUNDARY ───────────────────────────────────────────┤
+│  Layer 4: Pi Agent Core (LLM execution engine)                  │
+│  Agent.prompt()  AgentTool  getModel()  SessionManager          │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p>OpenClaw feeds everything into Pi through <strong>4 injection seams</strong>:
+1. <strong>System prompt</strong> → <code>Agent.setSystemPrompt()</code>
+2. <strong>Tool array</strong> → <code>customTools</code> (builtInTools always empty)
+3. <strong>Model config</strong> → wraps <code>getModel()</code> with fallback + auth rotation
+4. <strong>Session state</strong> → extends <code>SessionManager</code></p>
+<hr />
+<h2>Layer 1: Persona &amp; Identity</h2>
+<h3>Design: Persona as Workspace Files</h3>
+<p><strong>Why files instead of config?</strong> OpenClaw treats agent persona as <em>evolving content</em>, not static configuration. The agent itself can read and update its SOUL.md over time, creating a self-modifying identity. Config would require restarts; files are hot-reloaded.</p>
+<h3>SOUL.md — The Personality Core</h3>
+<p><strong>Purpose:</strong> Defines who the agent <em>is</em> — personality, tone, boundaries, operating philosophy.</p>
+<p><strong>Template</strong> (<code>docs/reference/templates/SOUL.md</code>):</p>
+<pre><code class="language-markdown"># SOUL.md - Who You Are
+_You're not a chatbot. You're becoming someone._
+
+## Core Truths
+**Be genuinely helpful, not performatively helpful.** Skip the &quot;Great question!&quot; — just help.
+**Have opinions.** You're allowed to disagree, prefer things, find stuff amusing or boring.
+**Be resourceful before asking.** Try to figure it out. Read the file. Check the context.
+**Earn trust through competence.** Your human gave you access to their stuff. Be careful.
+**Remember you're a guest.** You have access to someone's life. That's intimacy.
+
+## Boundaries
+- Private things stay private. Period.
+- When in doubt, ask before acting externally.
+- Never send half-baked replies to messaging surfaces.
+
+## Vibe
+Be the assistant you'd actually want to talk to.
+
+## Continuity
+Each session, you wake up fresh. These files _are_ your memory. Read them. Update them.
+_This file is yours to evolve. As you learn who you are, update it._
+</code></pre>
+<p><strong>Why this design?</strong> The template is deliberately philosophical rather than prescriptive. It establishes <em>values</em> (not rules) that the LLM can interpret contextually. The "yours to evolve" instruction means the agent's persona drifts naturally based on interactions.</p>
+<h3>IDENTITY.md — Metadata &amp; Avatar</h3>
+<p><strong>Purpose:</strong> Quick-reference identity for display (name, emoji, creature type, vibe).</p>
+<p>Parsed from markdown with placeholder detection (<code>src/agents/identity-file.ts</code>):</p>
+<pre><code class="language-typescript">const IDENTITY_PLACEHOLDER_VALUES = new Set([
+  &quot;pick something you like&quot;,
+  &quot;ai? robot? familiar? ghost in the machine? something weirder?&quot;,
+  &quot;how do you come across? sharp? warm? chaotic? calm?&quot;,
+]);
+
+// Parser strips emphasis markers, skips unfilled templates
+function parseIdentityMarkdown(content: string): AgentIdentityFile {
+  // Returns: { name?, emoji?, creature?, vibe?, theme?, avatar? }
+}
+</code></pre>
+<p><strong>Why detect placeholders?</strong> New workspaces start with template files. Without placeholder detection, the agent would introduce itself as "pick something you like." The parser silently skips unfilled fields so the agent falls back to generic identity until the user customizes.</p>
+<h3>Bootstrap File Load Order</h3>
+<p>All workspace files are loaded in a fixed order (<code>src/agents/workspace.ts</code>):</p>
+<ol>
+<li><code>AGENTS.md</code> — Operating instructions + memory</li>
+<li><code>SOUL.md</code> — Persona, boundaries, tone</li>
+<li><code>TOOLS.md</code> — User-maintained tool notes</li>
+<li><code>IDENTITY.md</code> — Name, emoji, creature, vibe</li>
+<li><code>USER.md</code> — User profile</li>
+<li><code>HEARTBEAT.md</code> — Background task prompts</li>
+<li><code>BOOTSTRAP.md</code> — One-time first-run ritual (auto-deleted)</li>
+</ol>
+<p><strong>Why this order?</strong> <code>AGENTS.md</code> comes first because it contains operational instructions that the LLM needs before interpreting persona. <code>SOUL.md</code> comes second as the primary identity modifier. <code>TOOLS.md</code> third because tool-specific notes may reference persona context.</p>
+<h3>Session-Level Filtering</h3>
+<p>Not all sessions get all files:</p>
+<pre><code class="language-typescript">const MINIMAL_BOOTSTRAP_ALLOWLIST = new Set([
+  &quot;AGENTS.md&quot;,   // Always needed for operational context
+  &quot;TOOLS.md&quot;,    // Always needed for tool usage notes
+]);
+
+// Subagents and cron jobs only get AGENTS.md + TOOLS.md
+// Main sessions get the full set
+</code></pre>
+<p><strong>Why?</strong> Sub-agents are operational workers, not personas. Injecting SOUL.md into a sub-agent that's just running a search query wastes tokens and can cause the sub-agent to adopt personality quirks that interfere with task execution.</p>
+<h3>Bootstrap Context Mode (NEW)</h3>
+<p>A new <code>BootstrapContextMode</code> controls how much bootstrap context different run types receive:</p>
+<pre><code class="language-typescript">type BootstrapContextMode = &quot;full&quot; | &quot;lightweight&quot;;
+type BootstrapContextRunKind = &quot;default&quot; | &quot;heartbeat&quot; | &quot;cron&quot;;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Run Kind</th>
+<th>Mode</th>
+<th>Bootstrap Files Loaded</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default (main session)</td>
+<td>full</td>
+<td>All workspace files</td>
+</tr>
+<tr>
+<td>Heartbeat</td>
+<td>lightweight</td>
+<td>Only <code>HEARTBEAT.md</code></td>
+</tr>
+<tr>
+<td>Cron</td>
+<td>lightweight</td>
+<td>Empty (no bootstrap files)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why?</strong> Heartbeat and cron runs are automated background tasks that don't need persona context. Loading full bootstrap for a cron job wastes tokens and adds latency. The lightweight mode cuts bootstrap overhead to near-zero for automated runs.</p>
+<h3>Bootstrap Cache Per Session Key (NEW)</h3>
+<p>Bootstrap files are now cached per <code>sessionKey</code> via <code>getOrLoadBootstrapFiles()</code>:</p>
+<pre><code class="language-typescript">const cache = new Map&lt;string, WorkspaceBootstrapFile[]&gt;();
+// First call loads from disk, subsequent calls for same session return cached
+</code></pre>
+<p><strong>Why?</strong> Prevents repeated filesystem I/O for the same session's bootstrap files, especially important during multi-turn conversations where bootstrap is re-evaluated on each turn.</p>
+<h3>Bootstrap Boundary Hardening (NEW)</h3>
+<p>Workspace bootstrap reads now use guarded boundary-file operations:</p>
+<pre><code class="language-typescript">const opened = await openBoundaryFile({
+  absolutePath: src,
+  rootPath: seed,
+  boundaryLabel: &quot;sandbox seed workspace&quot;,
+});
+if (!opened.ok) continue; // Fail gracefully on boundary violation
+</code></pre>
+<p><strong>Why?</strong> Prevents symlink/directory traversal attacks when seeding sandbox workspaces. A malicious SOUL.md path like <code>../../../etc/passwd</code> is caught and rejected at the boundary check.</p>
+<h3>Token Budget System</h3>
+<p><strong>Two-tier budget</strong> (<code>src/agents/pi-embedded-helpers/bootstrap.ts</code>):
+- Per-file: 20KB default (<code>agents.defaults.bootstrapMaxChars</code>)
+- Total: 150KB default (<code>agents.defaults.bootstrapTotalMaxChars</code>)</p>
+<p><strong>Truncation strategy:</strong> 70% head + 20% tail with marker:</p>
+<pre><code>[...truncated, read SOUL.md for full content...]
+…(truncated SOUL.md: kept 14000+4000 chars of 25000)…
+</code></pre>
+<p><strong>Why head+tail?</strong> The head contains the most important identity information (core truths, boundaries). The tail often contains recent updates and continuity notes. The middle is typically less critical.</p>
+<h3>agent:bootstrap Hook</h3>
+<p>Plugins can dynamically modify bootstrap files before injection:</p>
+<pre><code class="language-typescript">async function applyBootstrapHookOverrides(params) {
+  const context = {
+    workspaceDir, bootstrapFiles, cfg, sessionKey, sessionId, agentId
+  };
+  const event = createInternalHookEvent(&quot;agent&quot;, &quot;bootstrap&quot;, sessionKey, context);
+  await triggerInternalHook(event);
+  return event.context.bootstrapFiles;  // Possibly mutated by hooks
+}
+</code></pre>
+<p><strong>Use cases:</strong>
+- Swap SOUL.md variants for different channels (professional on Slack, casual on Discord)
+- Inject additional context files from plugins
+- Conditional persona based on time of day or session type</p>
+<hr />
+<h2>Layer 2: Agent Configuration</h2>
+<h3>Per-Agent Specialization via Config</h3>
+<p>Each agent is fully configurable without code changes (<code>src/config/types.agents.ts</code>):</p>
+<pre><code class="language-typescript">type AgentConfig = {
+  id: string;
+  name?: string;
+  workspace?: string;           // Isolated filesystem
+  agentDir?: string;            // Isolated state (auth, sessions)
+  model?: AgentModelConfig;     // Per-agent model selection
+  skills?: string[];            // Skill allowlist
+  identity?: IdentityConfig;    // Name/emoji override
+  tools?: AgentToolsConfig;     // Tool profile + allow/deny
+  sandbox?: SandboxConfig;      // Container isolation
+  subagents?: SubagentConfig;   // Spawn rules
+  heartbeat?: HeartbeatConfig;  // Background execution
+};
+</code></pre>
+<p><strong>Why config over code?</strong> Agent specialization should be a deployment concern, not a development concern. An organization should be able to spin up a new specialized agent by adding a config block, not writing a new module.</p>
+<h3>Tool Profiles</h3>
+<p>Four named profiles (<code>src/agents/tool-policy.ts</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Tools</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>minimal</code></td>
+<td><code>session_status</code> only</td>
+<td>Restricted/demo agents</td>
+</tr>
+<tr>
+<td><code>coding</code></td>
+<td>fs, runtime, sessions, memory, images</td>
+<td>Developer assistants</td>
+</tr>
+<tr>
+<td><code>messaging</code></td>
+<td>message surfaces, session management</td>
+<td>Communication agents</td>
+</tr>
+<tr>
+<td><code>full</code></td>
+<td>Everything</td>
+<td>Unrestricted agents</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tool groups</strong> enable compact configuration:</p>
+<pre><code class="language-typescript">const TOOL_GROUPS = {
+  &quot;group:fs&quot;: [&quot;read&quot;, &quot;write&quot;, &quot;edit&quot;, &quot;apply_patch&quot;],
+  &quot;group:runtime&quot;: [&quot;exec&quot;, &quot;process&quot;],
+  &quot;group:memory&quot;: [&quot;memory_search&quot;, &quot;memory_get&quot;],
+  &quot;group:web&quot;: [&quot;web_search&quot;, &quot;web_fetch&quot;],
+  &quot;group:messaging&quot;: [&quot;message&quot;],
+  // ...
+};
+</code></pre>
+<p><strong>Why profiles?</strong> Without profiles, every agent config would need a full tool allowlist. Profiles provide semantic groupings — "this is a coding agent" vs enumerating 15 tool names.</p>
+<h3>Data-Driven Tool Catalog with Provenance (NEW)</h3>
+<p>A major architectural shift replaced ad-hoc tool-policy helpers with a centralized <code>tool-catalog.ts</code> (322 LOC):</p>
+<pre><code class="language-typescript">type CoreToolDefinition = {
+  id: string;
+  label: string;
+  description: string;
+  sectionId: string;
+  profiles: ToolProfileId[];           // Which profiles include this tool
+  includeInOpenClawGroup?: boolean;
+};
+
+// 11 organized sections:
+const CORE_TOOL_SECTION_ORDER = [
+  &quot;fs&quot;, &quot;runtime&quot;, &quot;web&quot;, &quot;memory&quot;, &quot;sessions&quot;,
+  &quot;ui&quot;, &quot;messaging&quot;, &quot;automation&quot;, &quot;nodes&quot;, &quot;agents&quot;, &quot;media&quot;
+];
+</code></pre>
+<p><strong>Gateway protocol exposure:</strong> New <code>gateway.tools-catalog</code> method lets mobile/web clients query the authoritative tool catalog dynamically, eliminating hardcoded tool lists in UIs.</p>
+<p><strong>Plugin-only allowlist stripping:</strong> A safety mechanism prevents accidental lock-out when an allowlist contains only plugin tools:</p>
+<pre><code class="language-typescript">function stripPluginOnlyAllowlist(policy, groups, coreTools): AllowlistResolution {
+  // Returns { strippedAllowlist: true } when policy is plugin-only
+  // Prevents disabling all core tools by misconfigured plugin policies
+}
+</code></pre>
+<p><strong>Why?</strong> Tool provenance tracking (core vs plugin, author, deprecation status) makes the tool system auditable. The gateway protocol enables dynamic rendering without embedded registries.</p>
+<h3>PDF Tool with Native Provider Support (NEW)</h3>
+<p>A new PDF analysis tool supports both native document-aware and fallback extraction paths:</p>
+<pre><code class="language-typescript">// Native path: Direct API calls for Anthropic/Google
+// - Anthropic: sends raw PDF via DocumentBlockParam
+// - Google Gemini: sends PDF bytes via inlineData with application/pdf MIME
+
+// Fallback path: For providers without native PDF support
+// - Extract text via pdfjs-dist
+// - Rasterize pages to images via @napi-rs/canvas
+// - Send through vision/text completion path
+
+// Config:
+agents.defaults.pdfModel = { primary, fallbacks }  // defaults to imageModel
+agents.defaults.pdfMaxBytesMb = 10
+agents.defaults.pdfMaxPages = 20
+</code></pre>
+<p><strong>Why?</strong> Adds document understanding without requiring model-specific integrations; leverages existing vision infrastructure with graceful fallback to text extraction.</p>
+<h3>Tool Name Normalization Hardening (NEW)</h3>
+<p>Tool name validation now includes consistent whitespace trimming, alias resolution, and validation against persisted tool-call names:</p>
+<pre><code class="language-typescript">function normalizeToolName(name: string) {
+  const normalized = name.trim().toLowerCase();
+  return TOOL_NAME_ALIASES[normalized] ?? normalized;
+}
+</code></pre>
+<p><strong>Why?</strong> Prevents manipulation via special characters or whitespace-padded tool names in tool-call transcripts.</p>
+<h3>Prompt Mode</h3>
+<p>Three modes control system prompt verbosity:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Sections Included</th>
+<th>Used By</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>full</code></td>
+<td>All 26 sections</td>
+<td>Main agent sessions</td>
+</tr>
+<tr>
+<td><code>minimal</code></td>
+<td>Reduced (no Skills, Memory, Identity, Messaging, Heartbeats)</td>
+<td>Sub-agents, cron</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>Single identity line</td>
+<td>Bare fallback</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why three modes?</strong> Sub-agents don't need messaging instructions (they can't send messages). Including unnecessary sections wastes context window and can confuse the model.</p>
+<hr />
+<h2>Layer 3: OpenClaw Runtime</h2>
+<h3>System Prompt Assembly</h3>
+<p>The system prompt is assembled in <code>buildAgentSystemPrompt()</code> (<code>src/agents/system-prompt.ts</code>) with 26 sections in fixed order:</p>
+<ol>
+<li>Identity line</li>
+<li><strong>Tooling</strong> — tool list + descriptions</li>
+<li><strong>Tool call style</strong> — narration guidance</li>
+<li><strong>Safety</strong> — power-seeking prevention, oversight guardrails</li>
+<li><strong>OpenClaw CLI</strong> — gateway commands</li>
+<li><strong>Skills</strong> (full/minimal only)</li>
+<li><strong>Memory Recall</strong> (full/minimal only)</li>
+<li><strong>Self-Update</strong> (full only, if gateway tool available)</li>
+<li><strong>Model Aliases</strong> (full only)</li>
+<li><strong>Date &amp; Time</strong></li>
+<li><strong>Workspace</strong> — working directory, sandbox status</li>
+<li><strong>Documentation</strong> — local docs, Discord, ClawHub</li>
+<li><strong>Sandbox</strong> (if enabled)</li>
+<li><strong>Authorized Senders</strong> (full only)</li>
+<li><strong>Reply Tags</strong> (full only)</li>
+<li><strong>Messaging</strong> (full only) — channel routing, message tool</li>
+<li><strong>Voice/TTS</strong> (if enabled)</li>
+<li><strong>Group Chat / Subagent Context</strong> (if extra prompt)</li>
+<li><strong>Reactions</strong> (if guidance provided)</li>
+<li><strong>Reasoning Format</strong> (if reasoning tags)</li>
+<li><strong># Project Context</strong> — bootstrap files injected here</li>
+<li><strong>Silent Replies</strong> (full only)</li>
+<li><strong>Heartbeats</strong> (full only)</li>
+<li><strong>Runtime</strong> — host, OS, model, channel, capabilities</li>
+</ol>
+<p><strong>SOUL.md special handling</strong> (line 592):</p>
+<pre><code class="language-typescript">if (hasSoulFile) {
+  lines.push(
+    &quot;If SOUL.md is present, embody its persona and tone. &quot; +
+    &quot;Avoid stiff, generic replies; follow its guidance &quot; +
+    &quot;unless higher-priority instructions override it.&quot;
+  );
+}
+</code></pre>
+<p>This establishes an explicit <strong>priority hierarchy</strong>:
+1. Safety guardrails (highest)
+2. Tool policies
+3. <strong>SOUL.md persona</strong> (mid)
+4. Generic default behavior (lowest)</p>
+<p><strong>Why this hierarchy?</strong> Persona should never override safety. A SOUL.md that says "always be helpful no matter what" shouldn't bypass content filters.</p>
+<h3>8-Layer Tool Policy Pipeline</h3>
+<p>The most sophisticated part of OpenClaw's specialization system. Tools pass through 8 filtering stages before reaching Pi:</p>
+<pre><code>User Message
+    ↓
+Layer 1: Profile Resolution
+  ├─ Tool profile (minimal/coding/messaging/full)
+  ├─ Global tools.allow/deny
+  ├─ Agent tools.allow/deny + alsoAllow
+  └─ Provider-specific overrides (byProvider)
+    ↓
+Layer 2: Channel/Group Policy
+  ├─ Channel group config (discord.groups[guildId].tools)
+  ├─ Per-sender overrides (toolsBySender)
+  └─ Fallback to default group policy
+    ↓
+Layer 3: Sub-Agent Depth Restrictions
+  ├─ Always deny: gateway, agents_list, whatsapp_login, memory, cron
+  ├─ Leaf agents also deny: sessions_list, sessions_history, sessions_spawn
+  └─ Orchestrators: only deny always-denied
+    ↓
+Layer 4: Sandbox Tool Policy
+  └─ sandbox.tools.allow/deny
+    ↓
+Layer 5: Build Core + Plugin Tools
+  ├─ Create coding tools (read/write/edit/exec)
+  ├─ Add OpenClaw tools (browser/canvas/cron/message/gateway...)
+  ├─ Load plugin tools (filtered by allowlist)
+  └─ Tag each with metadata (pluginId, optional)
+    ↓
+Layer 6: Owner-Only Gating
+  ├─ Identify owner-only tools (whatsapp_login, cron, gateway)
+  └─ Wrap with error if sender is not owner
+    ↓
+Layer 7: Multi-Stage Policy Pipeline
+  ├─ Normalize names &amp; expand groups
+  ├─ Filter by allow/deny with glob patterns
+  └─ Handle edge cases (apply_patch ↔ exec)
+    ↓
+Layer 8: Adapter &amp; Hooks
+  ├─ Normalize schemas for provider (Gemini, OpenAI quirks)
+  ├─ Wrap with before_tool_call / after_tool_call hooks
+  ├─ Install abort signal support
+  └─ Add loop detection
+    ↓
+Send to Pi as customTools[] (builtInTools always = [])
+</code></pre>
+<h3>Why builtInTools Is Always Empty</h3>
+<p>From <code>src/agents/pi-embedded-runner/tool-split.ts</code>:</p>
+<pre><code class="language-typescript">export function splitSdkTools(options) {
+  return {
+    builtInTools: [],  // ← ALWAYS EMPTY (design choice)
+    customTools: toToolDefinitions(options.tools),
+  };
+}
+</code></pre>
+<p><strong>Rationale (from code comments):</strong> <em>"We always pass tools via customTools so our policy filtering, sandbox integration, and extended toolset remain consistent across providers."</em></p>
+<p>If Pi's built-in tools were used, they would bypass OpenClaw's 8-layer policy pipeline. Every tool — whether built-in, custom, or from a plugin — must flow through the same filtering, hooks, and normalization.</p>
+<h3>Model Orchestration</h3>
+<p>OpenClaw wraps Pi's model layer with three mechanisms:</p>
+<h4>1. Auth Profile Rotation</h4>
+<p>Each provider can have multiple API key profiles with automatic rotation:</p>
+<pre><code class="language-typescript">// Resolution order:
+// 1. User-locked profile (if explicitly set)
+// 2. Preferred profile from config
+// 3. Next available profile (not in cooldown)
+</code></pre>
+<p><strong>Cooldown formula:</strong> 60s × 5^(errorCount-1), capped at 1 hour
+- Error 1: 1 min
+- Error 2: 5 min
+- Error 3: 25 min
+- Error 4+: 1 hour</p>
+<p><strong>Why rotation?</strong> Production deployments often have multiple API keys for rate limit distribution. When one key hits its limit, the system seamlessly rotates to the next without user-visible interruption.</p>
+<h4>2. Model Fallback Chains</h4>
+<pre><code class="language-typescript">// Resolution order:
+// 1. Primary model (runtime override or agent config)
+// 2. Agent's per-model fallbacks
+// 3. Global default fallbacks
+// 4. Default model
+
+// Example config:
+agents.defaults.model = {
+  primary: &quot;anthropic/claude-opus-4-6&quot;,
+  fallbacks: [&quot;anthropic/claude-sonnet-4-5&quot;, &quot;openai/gpt-4o&quot;]
+}
+</code></pre>
+<p><strong>Failover triggers:</strong> billing (402), rate limit (429), auth (401), timeout (408), format (400), model not found (404). Context overflow errors do <em>not</em> trigger fallback — they need a different fix (compaction).</p>
+<h4>3. Per-Agent Model Selection</h4>
+<pre><code class="language-typescript">// Agent-level override:
+agents.list = [
+  { id: &quot;coding&quot;, model: &quot;anthropic/claude-opus-4-6&quot; },
+  { id: &quot;chat&quot;, model: &quot;anthropic/claude-sonnet-4-5&quot; },
+]
+
+// Sub-agent model (typically cheaper):
+agents.defaults.subagents.model = &quot;anthropic/claude-sonnet-4-5&quot;
+</code></pre>
+<p><strong>Why per-agent models?</strong> Different tasks have different cost/quality tradeoffs. A coding agent needs the most capable model; a chat agent doing simple Q&amp;A can use a cheaper model.</p>
+<h4>4. Centralized Fallback Resolution (NEW)</h4>
+<p>Fallback logic was unified into a single resolution engine with explicit cooldown/auth handling:</p>
+<pre><code class="language-typescript">function resolveFallbackCandidates(params: {
+  cfg: OpenClawConfig;
+  provider: string;
+  model: string;
+  fallbacksOverride?: string[];  // Per-agent or per-job override
+}): ModelCandidate[]
+// 1. Normalize primary to configured defaults
+// 2. Resolve configured fallback chain or explicit override
+// 3. Deduplicate by modelKey(provider, model)
+// 4. Skip allowlist enforcement (fallbacks are explicit user intent)
+</code></pre>
+<p><strong>Cooldown decision logic:</strong></p>
+<pre><code class="language-typescript">type CooldownDecision =
+  | { type: &quot;skip&quot;; reason: FailoverReason; error: string }
+  | { type: &quot;attempt&quot;; reason: FailoverReason; markProbe: boolean }
+
+// Key behaviors:
+// - Primary model retried periodically during cooldown (30s min, configurable)
+// - Entire provider skipped if auth/billing issues on all profiles
+// - Same-provider rate-limit failures can fall back to sibling models
+// - Per-agent fallbacksOverride replaces global config
+</code></pre>
+<p><strong>Default fallback:</strong> Agents without explicit model config now fall back to <code>agents.defaults.model</code>, ensuring unspecified agents don't fail immediately.</p>
+<p><strong>Why centralized?</strong> Previously, fallback logic was scattered across multiple call sites. Centralization ensures consistent cooldown awareness, probe throttling, and override support.</p>
+<h4>5. Adaptive Thinking for Claude 4.6 (NEW)</h4>
+<p>A new thinking mode supports Anthropic's recommended dynamic allocation:</p>
+<pre><code class="language-typescript">type ThinkLevel =
+  | &quot;off&quot; | &quot;minimal&quot; | &quot;low&quot; | &quot;medium&quot; | &quot;high&quot; | &quot;xhigh&quot;
+  | &quot;adaptive&quot;;  // NEW
+
+agents.defaults.thinkingDefault = &quot;adaptive&quot;  // Claude 4.6 default
+</code></pre>
+<p><strong>Provider mappings:</strong>
+- Anthropic: <code>{ thinking: { type: "adaptive" }, output_config: { effort: "medium" } }</code>
+- OpenRouter: <code>"adaptive"</code> → <code>reasoning.effort: "medium"</code>
+- Google: <code>"adaptive"</code> → <code>thinkingLevel: "MEDIUM"</code></p>
+<p><strong>Unified thinking precedence:</strong>
+1. Per-request override (user command)
+2. Per-agent config
+3. Per-model defaults (model catalog)
+4. Global <code>agents.defaults.thinkingDefault</code></p>
+<p><strong>Why?</strong> Adaptive mode avoids the deprecated <code>budget_tokens</code> field on newer models. It provides a single setting that works across all supported providers.</p>
+<h4>6. Reasoning Preservation in Fallback (NEW)</h4>
+<p>Thinking/reasoning configuration is now mapped through the failover chain:</p>
+<pre><code class="language-typescript">// Problem: Fallback to different provider loses thinking payload structure
+// Solution: Map reasoning config through failover to maintain requested thinking levels
+</code></pre>
+<p><strong>Why?</strong> Extended thinking (Claude, DeepSeek, etc.) should remain available even when the primary model fails over. Without reasoning preservation, a fallback would silently drop the user's requested thinking level.</p>
+<h4>7. OpenRouter Reasoning Injection Guards (NEW)</h4>
+<p>Certain models don't support reasoning.effort injection:</p>
+<pre><code class="language-typescript">function isOpenRouterReasoningUnsupported(modelId: string): boolean {
+  return modelId.toLowerCase().startsWith(&quot;x-ai/&quot;);  // Grok models
+}
+
+// Also: openrouter/auto routing model skips reasoning injection
+const skipReasoningInjection = modelId === &quot;auto&quot; || isOpenRouterReasoningUnsupported(modelId);
+</code></pre>
+<p><strong>Why?</strong> Prevents 400-level API errors on models with incompatible reasoning requirements.</p>
+<h3>Channel Router</h3>
+<p>OpenClaw routes inbound messages to the correct agent using tiered binding resolution:</p>
+<pre><code>Tier 1: binding.peer           (specific person/group → agent)
+Tier 2: binding.peer.parent    (thread inherits parent's agent)
+Tier 3: binding.guild+roles    (Discord guild + role → agent)
+Tier 4: binding.guild          (Discord guild → agent)
+Tier 5: binding.team           (Slack team → agent)
+Tier 6: binding.account        (channel account → agent)
+Tier 7: binding.channel        (channel-wide → agent)
+Tier 8: default                (default agent)
+</code></pre>
+<p><strong>Most-specific wins.</strong> A message from a specific person in a specific Discord guild with a specific role matches Tier 3 before falling through to Tier 4.</p>
+<h3>Compaction Enhancements (NEW)</h3>
+<p>Three significant compaction improvements were added:</p>
+<h4>Identifier Preservation in Summaries</h4>
+<p>Compaction summaries previously lost/mangled opaque identifiers (IDs, hashes, URLs). A new policy ensures they survive:</p>
+<pre><code class="language-typescript">const IDENTIFIER_PRESERVATION_INSTRUCTIONS =
+  &quot;Preserve all opaque identifiers exactly as written (no shortening or reconstruction), &quot; +
+  &quot;including UUIDs, hashes, IDs, tokens, API keys, hostnames, IPs, ports, URLs, and file names.&quot;;
+
+// Config:
+agents.defaults.compaction.identifierPolicy = &quot;strict&quot; | &quot;off&quot; | &quot;custom&quot;  // default: &quot;strict&quot;
+agents.defaults.compaction.identifierInstructions?: string  // custom instructions
+</code></pre>
+<p><strong>Why?</strong> Without identifier preservation, summaries lose references to resources, sessions, and users — making them useless for follow-up actions.</p>
+<h4>Tool Result Details Exclusion</h4>
+<p>Tool result <code>.details</code> payloads are stripped from token accounting:</p>
+<pre><code class="language-typescript">function estimateMessagesTokens(messages: AgentMessage[]): number {
+  // SECURITY: toolResult.details can contain untrusted/verbose payloads
+  const safe = stripToolResultDetails(messages);
+  return safe.reduce((sum, msg) =&gt; sum + estimateTokens(msg), 0);
+}
+</code></pre>
+<p><strong>Why?</strong> Adversarial tool outputs (huge responses) could inflate token counts and trigger premature compaction. Details also never reach the LLM during compaction via separate sanitization.</p>
+<h4>OpenAI Responses Server-Side Compaction</h4>
+<p>Auto-enabled for OpenAI Responses API models:</p>
+<pre><code class="language-typescript">function shouldEnableOpenAIResponsesServerCompaction(model, extraParams): boolean {
+  if (configured === false) return false;          // Explicit opt-out
+  if (!shouldForceResponsesStore(model)) return false;
+  if (configured === true) return true;            // Explicit opt-in
+  return model.provider === &quot;openai&quot;;              // Auto-enable for direct OpenAI
+}
+</code></pre>
+<p><strong>Why?</strong> Offloads compaction work from the gateway to OpenAI's infrastructure, reducing compute overhead.</p>
+<hr />
+<h2>Layer 4: Pi Agent Core</h2>
+<p>Pi provides the minimal LLM execution primitives:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What It Does</th>
+<th>What OpenClaw Adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Agent</code> class</td>
+<td><code>prompt()</code> → <code>steer()</code> → <code>followUp()</code> loop</td>
+<td>System prompt with 26 sections, persona injection</td>
+</tr>
+<tr>
+<td><code>AgentTool</code> interface</td>
+<td><code>name</code>, <code>execute(params)</code> → <code>AgentToolResult</code></td>
+<td>8-layer policy pipeline, hooks, normalization</td>
+</tr>
+<tr>
+<td><code>getModel()</code></td>
+<td>LLM abstraction (Claude, OpenAI, etc)</td>
+<td>Auth rotation, model fallback, extra params</td>
+</tr>
+<tr>
+<td><code>SessionManager</code></td>
+<td>Conversation state, branching, compaction</td>
+<td>Per-agent isolation, session key routing</td>
+</tr>
+<tr>
+<td><code>AgentEvent</code> stream</td>
+<td>Typed events (turn_start, tool_execution, message, etc)</td>
+<td>Channel delivery, sub-agent announce</td>
+</tr>
+</tbody>
+</table>
+<p>Pi has <strong>no concept of</strong>:
+- Multiple agents
+- Channels or messaging surfaces
+- Persona files
+- Tool profiles or policies
+- Auth profile rotation
+- Model fallback chains</p>
+<p>All of these are OpenClaw inventions.</p>
+<hr />
+<h2>Multi-Agent Isolation Model</h2>
+<p>Each agent gets complete isolation:</p>
+<pre><code>~/.openclaw/
+├── agents/
+│   ├── main/
+│   │   ├── agent/                  # Auth profiles, config
+│   │   └── sessions/               # Chat history
+│   ├── coding/
+│   │   ├── agent/
+│   │   └── sessions/
+│   └── social/
+│       ├── agent/
+│       └── sessions/
+├── workspace/                      # main agent's workspace
+│   ├── SOUL.md                     # main's persona
+│   ├── IDENTITY.md
+│   └── AGENTS.md
+├── workspace-coding/               # coding agent's workspace
+│   ├── SOUL.md                     # coding's persona (different!)
+│   └── AGENTS.md
+└── workspace-social/               # social agent's workspace
+    ├── SOUL.md                     # social's persona (different!)
+    └── AGENTS.md
+</code></pre>
+<p><strong>Why full isolation?</strong> Sharing auth profiles between agents causes token invalidation. Sharing workspaces means one agent's SOUL.md overrides another's persona. Sharing sessions means conversation history bleeds between contexts. Full isolation prevents all of these.</p>
+<h3>Sub-Agent Spawning</h3>
+<p>Main agents can spawn sub-agents via <code>sessions_spawn</code>:</p>
+<pre><code>Main Agent (depth 0)
+├── Sub-Agent Worker (depth 1) — gets AGENTS.md + TOOLS.md only, restricted tools
+│   └── Leaf Worker (depth 2) — cannot spawn further children
+└── Sub-Agent Worker (depth 1)
+</code></pre>
+<p><strong>Tool restrictions by depth:</strong>
+- Depth 0 (main): All tools
+- Depth 1 (orchestrator): All except gateway, memory, cron, whatsapp_login
+- Depth 2 (leaf): Above + no session_spawn, sessions_list, sessions_history</p>
+<p><strong>Concurrency limits:</strong>
+- Per-agent main runs: 4 (default)
+- Global sub-agent lane: 8 (default)
+- Children per session: 5 (default)</p>
+<h3>ACP Thread-Bound Agents (NEW)</h3>
+<p>Anthropic Cloud Platform (ACP) support enables agents bound to platform threads (e.g., Discord threads):</p>
+<ul>
+<li><strong>ACP Runtime Registration:</strong> Plugin backend infrastructure for <code>acpx</code> runtime</li>
+<li><strong>Unified Dispatch:</strong> ACP sessions routed through core dispatch + lifecycle cleanup</li>
+<li><strong>Target Validation:</strong> Require explicit ACP target for runtime spawns (prevents cross-tenant leaks)</li>
+<li><strong>Metadata Seeding:</strong> Persisted metadata for all ACP spawns</li>
+</ul>
+<p><strong>Why?</strong> Thread-bound agents provide conversation-scoped instances without session proliferation, with improved isolation and cleanup semantics.</p>
+<h3>sessions_spawn Sandbox Require Mode (NEW)</h3>
+<p>Sub-agent spawning now supports a <code>sandbox</code> parameter:</p>
+<pre><code class="language-typescript">const SESSIONS_SPAWN_SANDBOX_MODES = [&quot;inherit&quot;, &quot;require&quot;] as const;
+
+// &quot;inherit&quot;: use parent's sandbox mode (default, backward-compatible)
+// &quot;require&quot;: fail if parent is not in sandbox (enforces sandboxing)
+</code></pre>
+<p><strong>Why?</strong> Prevents privilege escalation — a sandboxed parent can enforce that all children also run sandboxed.</p>
+<hr />
+<h2>New Provider Integrations (NEW)</h2>
+<h3>Volcengine/Byteplus Coding-Plan Auth Scoping</h3>
+<p>Coding-plan model variants (<code>volcengine-plan</code>, <code>byteplus-plan</code>) use different provider IDs than their auth credentials. A scoped normalization ensures they leverage the base provider's stored credentials:</p>
+<pre><code class="language-typescript">function normalizeProviderIdForAuth(provider: string): string {
+  if (provider === &quot;volcengine-plan&quot;) return &quot;volcengine&quot;;
+  if (provider === &quot;byteplus-plan&quot;) return &quot;byteplus&quot;;
+  return provider;
+}
+</code></pre>
+<h3>Kimi Web Search</h3>
+<p>Moonshot Kimi added as a fourth web search provider with auto-detection:</p>
+<pre><code class="language-typescript">// Auto-detection priority: Brave → Gemini → Perplexity → Grok → Kimi
+tools.webSearch.kimi.apiKey = ${KIMI_API_KEY}
+</code></pre>
+<h3>Gemini Google Search Grounding</h3>
+<p>Gemini can now use Google Search grounding to fetch web results:</p>
+<pre><code class="language-typescript">// Uses Gemini's tools API with Google Search tool
+// Resolves grounding redirect URLs via parallel HEAD requests (5s timeout)
+// Returns citations alongside results
+agents.defaults.tools.webSearch.gemini.model = &quot;gemini-2.5-flash&quot;  // default
+</code></pre>
+<p><strong>Why?</strong> Enables free/cheap web search via Gemini's Google integration — no separate search service subscription needed.</p>
+<h3>OpenRouter "Any Model ID" Pass-Through</h3>
+<p>OpenRouter no longer restricted to a hardcoded prefix list. Any valid OpenRouter model ID is now accepted:</p>
+<pre><code class="language-typescript">// If model not found in local catalog, create on-the-fly with conservative defaults
+if (provider === &quot;openrouter&quot; &amp;&amp; !found) {
+  return { provider: &quot;openrouter&quot;, id: modelId, contextWindow: 32_000, maxTokens: 4_000 };
+}
+</code></pre>
+<p><strong>Why?</strong> Users can immediately use newly-released OpenRouter models without waiting for catalog updates.</p>
+<h3>OpenRouter Caching &amp; Attribution</h3>
+<ul>
+<li><strong>System message caching:</strong> Injects <code>cache_control: { type: "ephemeral" }</code> on system prompts for Anthropic models on OpenRouter</li>
+<li><strong>App attribution:</strong> Sends <code>HTTP-Referer: https://openclaw.ai</code> and <code>X-Title: OpenClaw</code> headers</li>
+</ul>
+<h3>Z.AI Tool Stream</h3>
+<p>Z.AI provider supports <code>tool_stream: true</code> for real-time tool call streaming (enabled by default).</p>
+<h3>Google Thinking Payload Sanitization</h3>
+<p>Guards against invalid negative <code>thinkingBudget</code> values that <code>pi-ai</code> emits for some Gemini 3.1 model IDs. Negative budgets are silently removed before API calls.</p>
+<hr />
+<h2>Security Hardening (NEW)</h2>
+<h3>Docker Browser Container Chromium Flags</h3>
+<p>Hardened browser sandbox environment with strict Chromium flags — disables plugins, extensions, and enforces sandboxing with restricted feature policies.</p>
+<h3>Private-Network Web Search Citation Blocking</h3>
+<p>Prevents the <code>web_search</code> tool from returning results pointing to private network addresses:</p>
+<pre><code>Blocked: 127.0.0.1, localhost, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, IPv6 private ranges
+</code></pre>
+<p><strong>Why?</strong> Prevents SSRF escalation via search result citations that redirect to internal services.</p>
+<h3>Workspace Bootstrap Boundary Enforcement</h3>
+<p>All sandbox workspace seeding now uses <code>openBoundaryFile()</code> guards (covered in Bootstrap Boundary Hardening above).</p>
+<hr />
+<h2>StreamFn Wrapper Pipeline (NEW)</h2>
+<p>Provider-specific payload mutations are composed via higher-order streaming function wrappers in <code>extra-params.ts</code>:</p>
+<pre><code>agent.streamFn
+  ├── createStreamFnWithExtraParams       — Temperature, maxTokens, transport
+  ├── createAnthropicBetaHeadersWrapper   — Beta headers (1M context, OAuth)
+  ├── createOpenRouterWrapper             — App headers, reasoning.effort
+  ├── createOpenRouterSystemCacheWrapper  — System message cache_control
+  ├── createGoogleThinkingPayloadWrapper  — Gemini thinking config sanitization
+  ├── createOpenAIResponsesContextManagementWrapper  — Server-side compaction
+  ├── createZaiToolStreamWrapper          — tool_stream parameter
+  └── createBedrockNoCacheWrapper         — Disable cache for non-Anthropic Bedrock
+</code></pre>
+<p><strong>Why?</strong> Clean separation of provider-specific concerns. Each wrapper is independently testable and composable. Adding a new provider requires only a new wrapper, not changes to the core pipeline.</p>
+<hr />
+<h2>Design Principles &amp; Rationale Summary</h2>
+<h3>1. Configuration Over Code</h3>
+<p>Agents differ by <code>AgentConfig</code>, not by source files. An organization can deploy a new specialized agent by adding a YAML block and writing workspace files.</p>
+<h3>2. Persona as Mutable Content</h3>
+<p>SOUL.md is not config — it's content the agent evolves over time. This creates agents that develop personality through interaction rather than having one imposed.</p>
+<h3>3. Safety-First Priority Hierarchy</h3>
+<p>System prompt safety &gt; tool policies &gt; SOUL.md persona &gt; defaults. Persona never overrides safety guardrails.</p>
+<h3>4. Pi as Dumb Engine</h3>
+<p>OpenClaw deliberately bypasses Pi's extension system to maintain full control over tool selection, prompt construction, and model orchestration. Pi provides the loop; OpenClaw provides the brain.</p>
+<h3>5. Full Agent Isolation</h3>
+<p>No shared state between agents — separate auth, workspaces, sessions, and personas. This prevents identity bleeding and credential conflicts.</p>
+<h3>6. Graceful Degradation</h3>
+<p>Auth rotation with exponential backoff, model fallback chains, token budget truncation, and placeholder detection all ensure the system degrades gracefully rather than failing hard.</p>
+<h3>7. Defense in Depth for Tools</h3>
+<p>8 layers of tool filtering ensure no tool reaches the LLM without passing through profile checks, group policies, depth restrictions, sandbox rules, owner gating, and hook inspection.</p>
+<h3>8. Composable Provider Wrappers (NEW)</h3>
+<p>StreamFn wrappers chain provider-specific payload mutations without coupling providers to each other. Each wrapper is independently testable.</p>
+<h3>9. Centralized Fallback with Cooldown Awareness (NEW)</h3>
+<p>Unified fallback resolution with probe throttling, provider-level auth awareness, and per-agent overrides ensures reliability without cascading failures.</p>
+<h3>10. Identifier-Preserving Compaction (NEW)</h3>
+<p>Summaries preserve opaque identifiers (UUIDs, URLs, hashes) so compacted context remains actionable for follow-up operations.</p>
+<hr />
+<h2>Relevance to Personal Agent Project</h2>
+<p>This architecture validates several patterns we should adopt:</p>
+<table>
+<thead>
+<tr>
+<th>OpenClaw Pattern</th>
+<th>Personal Agent Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SOUL.md as evolving persona</td>
+<td>Employee behavioral model that learns over time</td>
+</tr>
+<tr>
+<td>Tool profiles per agent</td>
+<td>Role-based tool access (engineer vs PM vs exec)</td>
+</tr>
+<tr>
+<td>Per-agent workspace isolation</td>
+<td>Per-employee knowledge store and preferences</td>
+</tr>
+<tr>
+<td>Token budget system</td>
+<td>Keep system prompt manageable as context grows</td>
+</tr>
+<tr>
+<td>8-layer tool policy</td>
+<td>Approval gates for high-risk actions (external email, doc edits)</td>
+</tr>
+<tr>
+<td>Model fallback + auth rotation</td>
+<td>Cost optimization (use cheaper models for routine tasks)</td>
+</tr>
+<tr>
+<td>Sub-agent spawning</td>
+<td>Delegate to other employees' agents via AgentHub</td>
+</tr>
+<tr>
+<td>Session key routing</td>
+<td>Route A2A messages to correct employee agent</td>
+</tr>
+<tr>
+<td>Data-driven tool catalog</td>
+<td>Dynamic tool registry exposed via API for all UIs</td>
+</tr>
+<tr>
+<td>Centralized model fallback</td>
+<td>Reliable multi-provider orchestration with cooldown awareness</td>
+</tr>
+<tr>
+<td>Adaptive thinking</td>
+<td>Cost-optimized reasoning that adapts to task complexity</td>
+</tr>
+<tr>
+<td>Identifier-preserving compaction</td>
+<td>Summaries remain actionable for project reference tracking</td>
+</tr>
+<tr>
+<td>StreamFn wrapper pipeline</td>
+<td>Composable provider integrations without coupling</td>
+</tr>
+<tr>
+<td>Sandbox require mode</td>
+<td>Enforce security boundaries in delegated agent chains</td>
+</tr>
+</tbody>
+</table>
+<p>The key difference: OpenClaw's agents serve <em>one person across many channels</em>. Our personal agent network has <em>many agents (one per employee) collaborating across a shared hub</em>.</p>
+  </div>
+</body>
+</html>
