@@ -441,6 +441,149 @@ async function dispatchMessage(
 
 ---
 
+## Diagrams
+
+### Architecture: Channel Router System
+
+```mermaid
+graph TB
+    subgraph "Inbound Messages"
+        TG[Telegram\ntelegram:chatId:X]
+        DC[Discord\ndiscord:server:channel]
+        SL[Slack\nslack:workspace:channel]
+        WH[Webhook\nautomation:agentId]
+        ACP_IN[ACP\nacp:agentId]
+        OTHER[Matrix · Teams · Signal\niMessage · WhatsApp · Voice · CLI]
+    end
+
+    subgraph "Channel Router"
+        T1[Tier 1 · Exact Channel Match\ncfg.channels.bindings]
+        T2[Tier 2 · Pattern Match\nglob or /regex/]
+        T3[Tier 3 · Channel Type\ncfg.channels.byType]
+        T4[Tier 4 · Workspace Default\ncfg.agents.workspace.default]
+        T5[Tier 5 · Global Default\ncfg.agents.default]
+        T6[Tier 6 · Auto-Pair\nPairingStore.getOrAssign]
+        T7[Tier 7 · ACP Route\nparse envelope → to_agent_id]
+        T8[Tier 8 · Reject\nno binding found]
+        SENDER[Sender Access Check\nallowedSenders · blockedSenders]
+    end
+
+    subgraph "Downstream"
+        RL[Rate Limiter\nper-channel RPM]
+        POOL[Agent Pool\ngetOrCreate]
+        SESS[Session Key\nagentId:channelId:senderId]
+    end
+
+    TG & DC & SL & OTHER --> T1
+    T1 -->|miss| T2 -->|miss| T3 -->|miss| T4 -->|miss| T5 -->|miss| T6
+    ACP_IN --> T7
+    T6 -->|miss| T8
+    T1 & T2 & T3 & T4 & T5 & T6 & T7 -->|binding found| SENDER
+    SENDER -->|blocked| T8
+    SENDER -->|allowed| RL --> POOL --> SESS
+```
+
+### Flow: 8-Tier Binding Resolution
+
+```mermaid
+flowchart TD
+    MSG[ChannelMessage arrives] --> ACP_CHECK{channelType = acp?}
+    ACP_CHECK -->|Yes| T7[parse ACP envelope\nroute to to_agent_id]
+    ACP_CHECK -->|No| T1{Tier 1: exact match\ncfg.bindings\nchannelId?}
+    T1 -->|hit| BIND[ChannelBinding created]
+    T1 -->|miss| T2{Tier 2: pattern match\nglob or regex\non channelId?}
+    T2 -->|hit| BIND
+    T2 -->|miss| T3{Tier 3: channel type\ncfg.byType\nchannelType?}
+    T3 -->|hit| BIND
+    T3 -->|miss| T4{Tier 4: workspace default\ncfg.agents.workspace.default?}
+    T4 -->|hit| BIND
+    T4 -->|miss| T5{Tier 5: global default\ncfg.agents.default?}
+    T5 -->|hit| BIND
+    T5 -->|miss| T6{Tier 6: auto-pair\nautoPair.enabled?}
+    T6 -->|assigned| BIND
+    T6 -->|no slot| REJECT[return null\nreject message]
+    T7 -->|target found| BIND
+    T7 -->|not found| REJECT
+    BIND --> SENDER_CHECK{checkSenderAccess\nblockedSenders · allowedSenders}
+    SENDER_CHECK -->|blocked| REJECT
+    SENDER_CHECK -->|allowed| DISPATCH[dispatchMessage → Agent]
+```
+
+### Sequence: First-Time User Auto-Pairing
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Router as ChannelRouter
+    participant Pairing as PairingStore
+    participant Registry as AgentRegistry
+    participant Agent
+
+    User->>Router: message from telegram:chatId:99999 (new user)
+
+    Router->>Router: T1 exact match? NO
+    Router->>Router: T2 pattern match? NO
+    Router->>Router: T3 channel type? NO
+    Router->>Router: T4 workspace default? NO
+    Router->>Router: T5 global default? NO
+    Router->>Pairing: getOrAssign("telegram:chatId:99999", {type:telegram})
+
+    Pairing->>Pairing: no existing confirmed pairing
+    Pairing->>Registry: findAvailableAgent(telegram)
+    Registry-->>Pairing: agentId="agent-alice"
+    Pairing->>Pairing: INSERT unconfirmed pairing
+    Pairing-->>Router: "agent-alice"
+
+    Router-->>Agent: ChannelBinding{agentId=alice, tier=auto_pair}
+    Agent->>User: "Hi! I'm Alice. Type /confirm to pair with me."
+
+    User->>Router: "/confirm"
+    Router->>Pairing: confirm("telegram:chatId:99999")
+    Pairing->>Pairing: UPDATE SET confirmed_at = now
+```
+
+### Component: Session Key Resolution
+
+```mermaid
+graph TD
+    BINDING[ChannelBinding] --> SK_CHECK{ACP route?}
+    SK_CHECK -->|Yes| SK_ACP[sessionKey from ACP\nacp:thread_id]
+    SK_CHECK -->|No| OVERRIDE{binding.config\n.sessionKey set?}
+    OVERRIDE -->|Yes| SK_CUSTOM[use configured sessionKey]
+    OVERRIDE -->|No| THREAD{message\n.threadId set?}
+    THREAD -->|Yes| SK_THREAD[agentId:channelId:threadId\nthreaded channels: Discord · Slack]
+    THREAD -->|No| SK_SENDER[agentId:channelId:senderId\nmost channels: Telegram · iMessage]
+```
+
+### Sequence: Full Message Dispatch Pipeline
+
+```mermaid
+sequenceDiagram
+    participant Channel as Messaging Channel
+    participant Sanitizer as Content Sanitizer
+    participant Router as ChannelRouter
+    participant Limiter as RateLimiter
+    participant Pool as AgentPool
+    participant Agent
+
+    Channel->>Sanitizer: raw ChannelMessage
+    Sanitizer->>Sanitizer: sanitizeUserContent\n"System:" → "System (untrusted):"
+    Sanitizer-->>Router: sanitized ChannelMessage
+
+    Router->>Router: resolve binding (8-tier walk)
+    Router-->>Limiter: ChannelBinding
+
+    Limiter->>Limiter: check RPM window
+    alt rate limited
+        Limiter-->>Channel: "Rate limit. Try in Xs"
+    else allowed
+        Limiter->>Pool: getOrCreate(agentId, sessionKey)
+        Pool-->>Agent: AgentExecutionContext
+        Agent->>Agent: handleMessage\n→ system prompt → tools → LLM → reply
+        Agent-->>Channel: response
+    end
+```
+
 ## Implementation Checklist
 
 - [ ] `ChannelBinding` with `agentId`, `sessionKey`, `tier`, `config`

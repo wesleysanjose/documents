@@ -478,6 +478,150 @@ agents:
 
 ---
 
+## Diagrams
+
+### Architecture: Context Management System
+
+```mermaid
+graph TB
+    subgraph "Write Lock"
+        WL[SessionWriteLock\nper-session async mutex]
+        CHAIN[Promise chaining\nserializes concurrent turns]
+        TIMEOUT[30s timeout\ndeadlock prevention]
+    end
+
+    subgraph "Pruning"
+        PRUNE[pruneConversationHistory\ntoken budget enforcement]
+        STRAT{PruningStrategy}
+        FIFO[fifo\nremove oldest first]
+        IMP[importance\nremove lowest score first]
+        WIN[window\nkeep last N messages]
+        HYB[hybrid\nimportance × recency weight]
+        KEEP[keepFirstN + keepLastN\nalways-preserve zones]
+    end
+
+    subgraph "Compaction"
+        TRIGGER[shouldCompact\ntokenLimit · turnLimit · maxCompactions]
+        FLUSH[flushContextToMemory\nLLM extraction → memory DB]
+        SUMMARY[generateConversationSummary\nLLM compression]
+        REBUILD[Replace messages:\nsummary + last 4 msgs]
+        BUMP[compactionCount++\ntotalTokensFresh=true]
+    end
+
+    subgraph "Session State"
+        SE[SessionEntry\ncompactionCount · totalTokens · totalTokensFresh]
+    end
+
+    WL --> CHAIN --> TIMEOUT
+    PRUNE --> STRAT
+    STRAT --> FIFO & IMP & WIN & HYB
+    KEEP --> PRUNE
+
+    TRIGGER --> FLUSH --> SUMMARY --> REBUILD --> BUMP
+    BUMP --> SE
+    PRUNE --> SE
+```
+
+### Sequence: Write Lock — Concurrent Turn Handling
+
+```mermaid
+sequenceDiagram
+    participant UserMsg as User Message
+    participant CronMsg as Cron Turn
+    participant Lock as SessionWriteLock
+    participant Handler as handleMessage
+
+    UserMsg->>Lock: acquire("session:alice:main")
+    Note over Lock: Lock free — granted immediately
+    Lock-->>UserMsg: release function
+
+    CronMsg->>Lock: acquire("session:alice:main")
+    Note over Lock: Lock held — CronMsg waits in chain
+
+    UserMsg->>Handler: handleMessage (LLM call ~3s)
+    Handler-->>UserMsg: done
+    UserMsg->>Lock: release()
+
+    Note over Lock: Lock released — CronMsg proceeds
+    Lock-->>CronMsg: release function
+    CronMsg->>Handler: handleMessage
+    Handler-->>CronMsg: done
+    CronMsg->>Lock: release()
+```
+
+### Flow: Pruning Decision
+
+```mermaid
+flowchart TD
+    A[pruneConversationHistory\nmessages · config] --> B[sumTokens all messages]
+    B --> C{total ≤ maxTokens?}
+    C -->|Yes| D[return unchanged\nno pruning needed]
+    C -->|No| E[Split: pinned vs candidates\nisPinned=true never pruned]
+    E --> F[keepFirst = candidates0..keepFirstN\nkeepalways-protect anchors]
+    F --> G[keepLast = candidates -keepLastN..\nprotect recency]
+    G --> H[pruneable = candidates in middle]
+    H --> I[selectForPruning\nstrategy: fifo · importance · window · hybrid]
+    I --> J[sum tokens of removed messages]
+    J --> K{token deficit\ncovered?}
+    K -->|No| L[log warn: pruning insufficient]
+    K -->|Yes| M[Rebuild list:\npinned + keepFirst + remaining pruneable + keepLast]
+    M --> N[log: pruned N messages X tokens]
+```
+
+### Sequence: Compaction Pipeline
+
+```mermaid
+sequenceDiagram
+    participant AgentLoop
+    participant Trigger as shouldCompact
+    participant Flush as flushContextToMemory
+    participant CompLLM as Compaction LLM\n(haiku)
+    participant MemDB as Memory DB
+    participant Session as SessionEntry
+
+    AgentLoop->>Trigger: check(messages, session, config)
+    Trigger->>Trigger: totalTokens > 160k OR turns > 50?
+    Trigger-->>AgentLoop: true — compact now
+
+    AgentLoop->>Flush: flushContextToMemory(messages)
+    Flush->>CompLLM: transcript + EXTRACTION_SYSTEM_PROMPT
+    CompLLM-->>Flush: JSON [{content, category, importance}]
+    loop each extracted memory
+        Flush->>MemDB: store(source=compaction)
+    end
+    Flush-->>AgentLoop: flushedCount=12, summary="..."
+
+    AgentLoop->>CompLLM: full transcript for summary
+    CompLLM-->>AgentLoop: prose summary of conversation
+
+    AgentLoop->>AgentLoop: Replace messages:\n[summary message] + last 4 messages
+
+    AgentLoop->>Session: compactionCount++\ntotalTokens=tokensAfter\ntotalTokensFresh=true\nclear inputTokens·outputTokens·cacheRead·cacheWrite
+```
+
+### Flow: Pruning Strategy Comparison
+
+```mermaid
+graph LR
+    subgraph "FIFO"
+        FI[Remove oldest messages\nuntil token deficit covered]
+    end
+    subgraph "Importance"
+        IM[Sort by importance ASC\nremove lowest until covered]
+    end
+    subgraph "Window"
+        WN[Keep last windowSize msgs\ndrop everything before]
+    end
+    subgraph "Hybrid (recommended)"
+        HY[Score = 0.4×importance + 0.6×recencyScore\nremove lowest score first]
+    end
+
+    FI -->|Simple but loses\nrecent context| TRADEOFF
+    IM -->|Good for importance-tagged\nmessages| TRADEOFF
+    WN -->|Simple sliding window\nlosses context anchors| TRADEOFF
+    HY -->|Balanced: recent AND\nimportant messages kept| TRADEOFF[Trade-off]
+```
+
 ## Implementation Checklist
 
 - [ ] `SessionWriteLock` — per-session async mutex (Promise chaining)

@@ -505,6 +505,139 @@ const memoryTools: AgentTool[] = [
 
 ---
 
+## Diagrams
+
+### Architecture: Three-Layer Memory System
+
+```mermaid
+graph TB
+    subgraph "Write Path"
+        WT[memory_store tool call\ncontent · category · importance]
+        EMBED[EmbeddingModel.embed\nFloat32Array]
+        INS_ROW[INSERT INTO memories\nid · content · embedding · metadata]
+        INS_FTS[INSERT INTO memories_fts\nBM25 index update]
+    end
+
+    subgraph "Read Path"
+        RT[memory_search tool call\nquery · category · limit]
+        QEMBED[embed query]
+        BM25[BM25 Search\nFTS5 MATCH]
+        VEC[Vector Search\ncosine similarity]
+        MERGE[mergeHybridResults\nnormalize + weight-sum]
+        ACC[updateAccessMetadata\naccessed_at · access_count]
+        RES[SearchResult list\nscore + record]
+    end
+
+    subgraph "Compaction Path"
+        CTX[Conversation History\nnear context limit]
+        LLM_EXT[LLM Extraction\nJSON: content·category·importance]
+        BULK[Bulk store\nsource=compaction]
+        SUMM[buildCompactionSummary\nprepend to truncated context]
+    end
+
+    subgraph "Storage"
+        DB[(SQLite\n~/.openclaw/state/memory\n{agentId}.sqlite)]
+        MEM_TBL[memories table\nid · content · embedding · category]
+        FTS_TBL[memories_fts\nFTS5 virtual table]
+    end
+
+    WT --> EMBED --> INS_ROW --> DB
+    WT --> INS_FTS --> DB
+    DB --> MEM_TBL & FTS_TBL
+
+    RT --> QEMBED --> VEC --> MERGE
+    RT --> BM25 --> MERGE
+    FTS_TBL --> BM25
+    MEM_TBL --> VEC
+    MERGE --> ACC --> RES
+
+    CTX --> LLM_EXT --> BULK --> DB
+    LLM_EXT --> SUMM
+```
+
+### Flow: Hybrid Search (BM25 + Vector)
+
+```mermaid
+flowchart TD
+    Q[search query] --> E[embed query → Float32Array]
+    Q --> BM25Q[FTS5 MATCH query\nfilter: agent_id · category · importance]
+    E --> VECQ[Cosine similarity over all\nagent embeddings in SQLite]
+
+    BM25Q --> NORM_BM25[Normalize BM25 scores\nabs / max]
+    VECQ --> VEC_SCORES[Vector scores 0.0-1.0]
+
+    NORM_BM25 --> MERGE[mergeHybridResults\nscore = 0.5×BM25 + 0.5×vector]
+    VEC_SCORES --> MERGE
+
+    MERGE --> SORT[Sort by combined score DESC]
+    SORT --> FILTER{score ≥ 0.3?}
+    FILTER -->|No| DROP[stop - below threshold]
+    FILTER -->|Yes| TOKEN{token budget\nexceeded?}
+    TOKEN -->|Yes| DROP
+    TOKEN -->|No| ADD[add to excerpts]
+    ADD --> INJECT[inject into\nworkspace_memory section]
+```
+
+### Sequence: Memory Write Path
+
+```mermaid
+sequenceDiagram
+    participant Model as LLM
+    participant Tool as memory_store handler
+    participant Embedder as EmbeddingModel
+    participant DB as SQLite
+
+    Model->>Tool: { content, category, importance, tags }
+    Tool->>Embedder: embed(content)
+    Embedder-->>Tool: Float32Array (1536-dim)
+    Tool->>DB: INSERT INTO memories (id, content, embedding, ...)
+    Tool->>DB: INSERT INTO memories_fts (id, content)
+    DB-->>Tool: success
+    Tool-->>Model: MemoryRecord { id, createdAt, ... }
+```
+
+### Sequence: Per-Turn Memory Recall
+
+```mermaid
+sequenceDiagram
+    participant AgentLoop
+    participant Recall as recallRelevantMemories
+    participant Search as searchMemories
+    participant DB as SQLite
+    participant SPB as System Prompt Builder
+
+    AgentLoop->>Recall: userMessage, agentId, maxExcerpts=5
+    Recall->>Search: query=userMessage, limit=10, hybridWeight=0.5
+    Search->>DB: FTS5 MATCH + cosine similarity
+    DB-->>Search: ranked results
+    Search->>DB: UPDATE accessed_at, access_count++ for top-K
+    Search-->>Recall: SearchResult[]
+    Recall->>Recall: filter score >= 0.3, trim to token budget
+    Recall-->>AgentLoop: string[] excerpts
+    AgentLoop->>SPB: inject into workspace_memory section
+```
+
+### Sequence: Compaction Memory Flush
+
+```mermaid
+sequenceDiagram
+    participant Compactor
+    participant LLM as Compaction LLM\n(haiku model)
+    participant Store as MemoryStore
+    participant DB as SQLite
+
+    Note over Compactor: Context near limit
+    Compactor->>LLM: transcript of last N messages
+    Note over LLM: EXTRACTION_SYSTEM_PROMPT:\nextract facts · decisions · preferences
+    LLM-->>Compactor: JSON [ { content, category, importance } ]
+    loop for each extracted memory
+        Compactor->>Store: store({ content, category, source=compaction })
+        Store->>DB: embed + INSERT
+    end
+    Compactor->>Compactor: buildCompactionSummary\n(top 5 bullets)
+    Note over Compactor: Replace old messages with\n[Context compacted] + summary + last 4 messages
+```
+
 ## Implementation Checklist
 
 - [ ] SQLite schema: `memories` table + `memories_fts` FTS5 virtual table

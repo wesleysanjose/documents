@@ -517,6 +517,132 @@ agents:
 
 ---
 
+## Diagrams
+
+### Architecture: Automation System Components
+
+```mermaid
+graph TB
+    subgraph "4 Automation Types"
+        HB[Heartbeat\nsetInterval · HEARTBEAT.md]
+        CRON[Cron Scheduler\nexpression · payload · jitter]
+        POLL[Poll Scheduler\nsetInterval · source · filter · dedup]
+        HOOK[Webhook Server\nHTTP endpoint · HMAC · IP allowlist]
+    end
+
+    subgraph "Trigger Sources"
+        HB_SRC[Timer fires\nevery 15min default]
+        CRON_SRC[Cron expression fires\ne.g. 0 9 MON-FRI]
+        POLL_SRC[External source checked\nHTTP · file · command]
+        HOOK_SRC[Inbound HTTP POST\nfrom GitHub · PagerDuty · etc]
+    end
+
+    subgraph "Common Dispatch"
+        DISPATCH[dispatchAutomatedTurn\nagentId · sessionKey · message]
+        SYN[Synthetic ChannelMessage\nchannelType=cli · senderId=system]
+        EVENTS[emitSystemEvent\nappears in next human turn]
+    end
+
+    subgraph "Normal Agent Pipeline"
+        LOCK[Session Write Lock]
+        PROMPT[System Prompt Builder\nisHeartbeat flag]
+        TOOLS[Tool Policy Pipeline\nprofile=heartbeat or full]
+        LLM[LLM Call]
+    end
+
+    HB_SRC --> HB --> DISPATCH
+    CRON_SRC --> CRON --> DISPATCH
+    POLL_SRC --> POLL --> DISPATCH
+    HOOK_SRC --> HOOK --> DISPATCH
+
+    DISPATCH --> SYN --> EVENTS --> LOCK --> PROMPT --> TOOLS --> LLM
+```
+
+### Flow: Heartbeat Skip-If-Active Logic
+
+```mermaid
+flowchart TD
+    TICK[Heartbeat timer fires\nsetInterval N ms] --> SKIP{skipIfActive\nenabled?}
+    SKIP -->|No| READ[Read HEARTBEAT.md\nfrom workspaceDir]
+    SKIP -->|Yes| LAST[getLastActiveTime\nagentId · sessionKey]
+    LAST --> DIFF{now - lastActive\n< activeThreshold 5min?}
+    DIFF -->|Yes — user active| SKIP_TURN[skip this tick\nlog: agent active]
+    DIFF -->|No — idle| READ
+    READ --> EXISTS{file exists?}
+    EXISTS -->|No| DEFAULT[Use default prompt:\nperform routine maintenance]
+    EXISTS -->|Yes| USE[Use HEARTBEAT.md content]
+    DEFAULT & USE --> DISPATCH[dispatchAutomatedTurn\nisHeartbeat=true · profile=heartbeat]
+```
+
+### Flow: Cron Scheduler with Jitter
+
+```mermaid
+flowchart TD
+    A[CronScheduler.schedule spec] --> B[new CronJob\nexpression · timezone]
+    B --> C[Job fires at scheduled time]
+    C --> D{jitterMs > 0?}
+    D -->|Yes| E[sleep random 0..jitterMs ms\nprevent thundering herd]
+    D -->|No| F[interpolateTemplate payload\nnow · timestamp vars]
+    E --> F
+    F --> G[dispatchAutomatedTurn\nagentId · sessionKey · message]
+```
+
+### Flow: Poll Deduplication & Filtering
+
+```mermaid
+flowchart TD
+    TICK[Poll timer fires] --> FETCH[fetchSource\nHTTP / file / command / channel_summary]
+    FETCH --> ERR{fetch error?}
+    ERR -->|Yes| WARN[log warn · skip tick]
+    ERR -->|No| FILTER{filter set?}
+    FILTER -->|Yes| APPLY{applyPollFilter\ncontains · regex · minLength}
+    APPLY -->|No match| SKIP[skip tick]
+    APPLY -->|Match| DEDUP_CHK{dedupe=true?}
+    FILTER -->|No| DEDUP_CHK
+    DEDUP_CHK -->|Yes| HASH[fingerprint = hash rawData]
+    HASH --> SEEN{lastSeen\n= fingerprint?}
+    SEEN -->|Same — no change| SKIP
+    SEEN -->|Different| STORE[lastSeen.set fingerprint]
+    STORE --> SEND[interpolateTemplate\n{{data}} · {{now}}]
+    DEDUP_CHK -->|No| SEND
+    SEND --> DISPATCH[dispatchAutomatedTurn]
+```
+
+### Sequence: Webhook Event → Agent Turn
+
+```mermaid
+sequenceDiagram
+    participant GH as GitHub Webhook
+    participant WH as WebhookServer
+    participant Agent
+    participant Channel as Original Channel
+
+    GH->>WH: POST /webhooks/github/push\nX-Signature: sha256=...
+    WH->>WH: readBody()
+    WH->>WH: verifyHmac(body, secret, sig)\ntimingSafeEqual check
+    alt invalid signature
+        WH-->>GH: 401 Invalid signature
+    else valid
+        WH-->>GH: 202 Accepted (immediate)
+        Note over WH: setImmediate async dispatch
+        WH->>Agent: dispatchAutomatedTurn\nmessage = interpolateTemplate(payload)
+        Agent->>Agent: handleMessage through full pipeline
+        Note over Agent: No reply sent to webhook caller\n(fire-and-forget)
+    end
+```
+
+### Component: System Event Integration
+
+```mermaid
+graph LR
+    AUTO[Automation Turn fires] --> EMIT[emitSystemEvent\ntext: automated heartbeat\nts: now]
+    EMIT --> QUEUE[SystemEventQueue\nper-sessionKey]
+    QUEUE --> DRAIN[drainFormattedSystemEvents\nat start of next human turn]
+    DRAIN --> FILTER[compactSystemEvent\nfilter: reason periodic\nfilter: heartbeat poll/wake noise]
+    FILTER --> FORMAT["[timestamp] Automated turn: heartbeat"]
+    FORMAT --> INJECT["System: [timestamp] Automated turn: heartbeat\ninjected into message timeline"]
+```
+
 ## Implementation Checklist
 
 - [ ] `AutomationSpec` with `type`, `heartbeat`, `cron`, `poll`, `webhook`

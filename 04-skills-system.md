@@ -419,6 +419,146 @@ function generateSkillTemplate(params: {
 
 ---
 
+## Diagrams
+
+### Architecture: Skills System Components
+
+```mermaid
+graph TB
+    subgraph "6 Source Locations (priority order)"
+        SRC1[1 · agent-specific\n.openclaw/agents/{agentId}/skills]
+        SRC2[2 · workspace shared\n.openclaw/skills]
+        SRC3[3 · legacy\nworkspace/skills]
+        SRC4[4 · plugin skill dirs\nfrom plugin manifests]
+        SRC5[5 · global user\n~/.openclaw/skills]
+        SRC6[6 · framework built-ins\nframeworkDir/skills]
+    end
+
+    subgraph "Skill Discovery"
+        DISC[discoverAllSkills\nscan all dirs for SKILL.md]
+        GATE[checkSkillGating\nbinary · env · disabled]
+        DEDUP[deduplicateByName\nhigher-priority source wins]
+        SNAP[SkillsSnapshot\nversion · skills · loadedAt]
+    end
+
+    subgraph "Injection + Dispatch"
+        XML[renderSkillsXml\n<skills> XML block]
+        SPB[System Prompt\nSection: skills]
+        SLASH[dispatchSlashCommand\n/name args → inject context]
+    end
+
+    subgraph "Hot Reload"
+        WATCH[chokidar watcher\ndepth=2]
+        DEBOUNCE[250ms debounce]
+        BUMP[version++]
+        STALE{session snapshot\nversion < current?}
+    end
+
+    SRC1 & SRC2 & SRC3 & SRC4 & SRC5 & SRC6 --> DISC
+    DISC --> GATE --> DEDUP --> SNAP
+    SNAP --> XML --> SPB
+    SNAP --> SLASH
+    WATCH --> DEBOUNCE --> BUMP --> STALE
+    STALE -->|Yes| DISC
+```
+
+### Flow: Skill Discovery & Gating
+
+```mermaid
+flowchart TD
+    A[Start discovery] --> B[For each source dir in priority order]
+    B --> C[List subdirectories]
+    C --> D{SKILL.md\nexists?}
+    D -->|No| E[skip dir]
+    D -->|Yes| F[parseFrontmatter\nextract name + description]
+    F --> G{name and description\npresent?}
+    G -->|No| H[log warn · skip]
+    G -->|Yes| I{disabled: true\nin frontmatter?}
+    I -->|Yes| J[available=false]
+    I -->|No| K{requires_binary\nset?}
+    K -->|Yes, not in PATH| J
+    K -->|No / found| L{requires_env\nset?}
+    L -->|Yes, not set| J
+    L -->|No / set| M{requires_env_any\nset?}
+    M -->|Yes, none set| J
+    M -->|No / any set| N[available=true]
+    J & N --> O[SkillRecord created]
+    O --> P[deduplicateByName\nfirst seen = highest priority wins]
+    P --> Q[SkillsSnapshot\nonly available=true skills]
+```
+
+### Sequence: Hot Reload Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant Agent
+    participant Watcher as chokidar Watcher
+    participant State as Watcher State
+    participant Session
+
+    Agent->>Watcher: ensureSkillsWatcher(workspaceDir)
+    Note over Watcher: watches all 6 source dirs
+
+    Note over Agent: User creates new skill
+    Watcher->>State: file add/change event
+    State->>State: debounce 250ms
+    State->>State: version++ (e.g. 3 → 4)
+
+    Agent->>State: getSkillsSnapshotVersion()
+    State-->>Agent: version=4
+    Agent->>Session: session.skillsSnapshot.version=3
+    Note over Agent: 3 < 4 → stale
+
+    Agent->>Agent: buildWorkspaceSkillSnapshot(version=4)
+    Agent->>Session: update skillsSnapshot
+    Agent->>Agent: inject new XML into system prompt
+```
+
+### Sequence: Slash Command Dispatch
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Gateway
+    participant Dispatcher as dispatchSlashCommand
+    participant Session
+    participant AgentLoop
+
+    User->>Gateway: /deploy-check api-gateway
+
+    Gateway->>Dispatcher: input="/deploy-check api-gateway", snapshot
+    Dispatcher->>Dispatcher: match /^\/([a-zA-Z0-9_-]+)(.*)$/
+    Note over Dispatcher: name=deploy-check, args=api-gateway
+
+    Dispatcher->>Dispatcher: find skill in snapshot.skills
+    alt skill found
+        Dispatcher->>Session: pendingSkillContext = injected instructions
+        Dispatcher-->>Gateway: "dispatched"
+        Gateway->>AgentLoop: next turn with skillContext prepended
+        AgentLoop->>AgentLoop: System: [Skill invoked: /deploy-check]\nSkill instructions: ...
+    else unknown command
+        Dispatcher-->>Gateway: "unknown_command"
+        Gateway-->>User: Unknown skill: /deploy-check
+    end
+```
+
+### Flow: Self-Creation Loop
+
+```mermaid
+flowchart LR
+    A[User: create a git-status skill] --> B[Agent calls write_file tool]
+    B --> C[workspace/skills/git-status/SKILL.md\ncreated on disk]
+    C --> D[chokidar fires\nadd event]
+    D --> E[250ms debounce]
+    E --> F[version 3 → 4]
+    F --> G[Next agent turn]
+    G --> H{snapshot.version 3\n< current 4?}
+    H -->|Yes| I[rebuild SkillsSnapshot]
+    I --> J[git-status included\nin XML injection]
+    J --> K[Model sees /git-status\nin system prompt]
+    K --> L[Agent can now\ninvoke /git-status]
+```
+
 ## Implementation Checklist
 
 - [ ] `SkillFrontmatter` with `name`, `description`, `requires_binary`, `requires_env`, `requires_env_any`, `tags`, `disabled`

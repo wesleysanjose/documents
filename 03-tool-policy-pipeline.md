@@ -371,6 +371,92 @@ agents:
 
 ---
 
+## Diagrams
+
+### Architecture: 8-Layer Tool Policy Pipeline
+
+```mermaid
+graph TB
+    IN[All Registered Tools\nToolRegistry.getAllTools]
+
+    subgraph "Pipeline — layers run in order"
+        L1[L1 · Profile Filter\nwhitelist or exclude-group]
+        L2[L2 · Group Expansion\nalias → individual names]
+        L3[L3 · Depth Restriction\nminDepth / maxDepth / maxCallDepth]
+        L4[L4 · Owner Gate\nownerOnly → require isOwner]
+        L5[L5 · Channel Allowlist\nplugin tool visibility per channel]
+        L6[L6 · Schema Normalize\nstrip format · $schema · $id · definitions]
+        L7[L7 · Hook Override\nuser async hooks · non-fatal]
+        L8[L8 · Dedup + Validate\ndedup by name · validate shape]
+    end
+
+    OUT[Final Tool List\npassed to LLM tools param]
+
+    IN --> L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7 --> L8 --> OUT
+```
+
+### Flow: Tool Journey Through Pipeline
+
+```mermaid
+flowchart TD
+    T[AgentTool enters pipeline] --> L1{L1: Profile Filter\nincludeTools whitelist?}
+    L1 -->|not in whitelist| DROP1[❌ dropped]
+    L1 -->|in whitelist / no whitelist| L1B{excludeGroups\nmatch?}
+    L1B -->|group excluded| DROP1
+    L1B -->|passes| L3{L3: Depth\ncallDepth in range?}
+    L3 -->|depth out of range| DROP3[❌ dropped]
+    L3 -->|passes| L4{L4: Owner Gate\nownerOnly?}
+    L4 -->|ownerOnly=true AND isOwner=false| DROP4[❌ dropped]
+    L4 -->|passes| L5{L5: Channel Allowlist\nchannelAllowlist set?}
+    L5 -->|channelId not in list| DROP5[❌ dropped]
+    L5 -->|passes| L6[L6: Schema Normalize\nstrip forbidden fields]
+    L6 --> L7[L7: Hook Override\nasync user hooks]
+    L7 --> L8{L8: Dedup\nname seen before?}
+    L8 -->|duplicate| DROP8[❌ dropped]
+    L8 -->|unique + valid schema| PASS[✅ included in final list]
+```
+
+### Component: Tool Profiles
+
+```mermaid
+graph LR
+    subgraph "Built-in Profiles"
+        PF[full\nno restrictions]
+        PR[readonly\nexclude: write · execute · destructive]
+        PM[minimal\nincludeTools: memory_search · web_search]
+        PH[heartbeat\nexclude: user-interactive · voice\nmaxCallDepth: 1]
+    end
+
+    subgraph "Applied at L1"
+        PF --> FULL_TOOLS[All tools pass]
+        PR --> RO_TOOLS[Read-only tools only]
+        PM --> MIN_TOOLS[2 tools only]
+        PH --> HB_TOOLS[Reduced set · depth=1]
+    end
+```
+
+### Sequence: Sub-Agent Tool Policy
+
+```mermaid
+sequenceDiagram
+    participant Main as Main Agent\ndepth=0
+    participant Tool as Tool Handler
+    participant Sub as Sub-Agent\ndepth=1
+    participant Pipeline as Policy Pipeline
+
+    Main->>Pipeline: resolveForCall(depth=0, profile=full, isOwner=true)
+    Pipeline-->>Main: 40 tools (all pass)
+
+    Main->>Tool: invoke tool_X
+    Tool->>Sub: spawnSubAgent(role=tool)
+    Sub->>Pipeline: resolveForCall(depth=1, profile=readonly, isOwner=false)
+    Note over Pipeline: L3: orchestrator-tagged tools dropped at depth>maxCallDepth
+    Note over Pipeline: L4: ownerOnly tools dropped (isOwner=false)
+    Pipeline-->>Sub: 12 tools (reduced set)
+    Sub-->>Tool: result
+    Tool-->>Main: tool_X result
+```
+
 ## Implementation Checklist
 
 - [ ] `AgentTool` interface with `groups`, `minDepth`, `maxDepth`, `ownerOnly`, `channelAllowlist`

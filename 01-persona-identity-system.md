@@ -391,6 +391,101 @@ function isPathInside(parent: string, child: string): boolean {
 
 ---
 
+## Diagrams
+
+### Architecture: Bootstrap System Components
+
+```mermaid
+graph TB
+    subgraph "Workspace Files"
+        S[SOUL.md\nverbatim · 2000 tok]
+        ID[IDENTITY.md\nverbatim · 1500 tok]
+        AG[AGENTS.md\nCLAUDE.md alias · 8000 tok]
+        TO[TOOLS.md\ntrimmed · 3000 tok]
+        RE[README.md\nsummary · 1500 tok]
+    end
+
+    subgraph "Bootstrap System"
+        BFR[BOOTSTRAP_FILES Registry\n5 entries · priority order]
+        LBC[loadBootstrapContext]
+        LBF[loadBootstrapFile\npath traversal guard]
+        ATB[applyTokenBudget\n12k global limit]
+        RBS[renderBootstrapSections\nidentity · workspace_instructions · workspace_context]
+        CACHE[Per-session Cache\n1h staleness TTL]
+    end
+
+    subgraph "Consumers"
+        SPB[System Prompt Builder\nDoc 02]
+        SA[Sub-Agent Filter\nfilterBootstrapForSubAgent]
+    end
+
+    S & ID & AG & TO & RE --> LBF --> LBC
+    BFR --> LBC
+    LBC <--> CACHE
+    LBC --> ATB --> RBS
+    RBS --> SPB
+    LBC --> SA
+```
+
+### Flow: Bootstrap Load & Token Budget
+
+```mermaid
+flowchart TD
+    A[Agent turn starts] --> B{Session cache\nfresh? < 1h}
+    B -->|Yes| C[Return cached\nBootstrapContext]
+    B -->|No / first turn| D[Read 5 files in priority order]
+    D --> E[estimateTokens for each file]
+    E --> F{Total >\n12k budget?}
+    F -->|No| G[All files kept as-is]
+    F -->|Yes| H[applyTokenBudget\nSOUL first, README last]
+    H --> I{Still over budget?}
+    I -->|Yes| J[Truncate lower-priority\nfiles to 0]
+    I -->|No| G
+    G --> K[BootstrapContext ready\nloadedAt = now]
+    K --> L[Store in session cache]
+    L --> C
+    C --> M[renderBootstrapSections\n→ 3 named sections]
+```
+
+### Sequence: First Turn vs Subsequent Turn
+
+```mermaid
+sequenceDiagram
+    participant AgentLoop
+    participant Cache as Session Cache
+    participant FS as Filesystem
+    participant SPB as System Prompt Builder
+
+    AgentLoop->>Cache: getOrLoadBootstrapContext(sessionKey)
+    alt First turn (cache miss)
+        Cache->>FS: readFile SOUL.md
+        Cache->>FS: readFile IDENTITY.md
+        Cache->>FS: readFile AGENTS.md (→ CLAUDE.md fallback)
+        Cache->>FS: readFile TOOLS.md
+        Cache->>FS: readFile README.md
+        Cache->>Cache: applyTokenBudget(12k)
+        Cache->>Cache: store BootstrapContext, loadedAt=now
+    else Subsequent turn (cache hit, age < 1h)
+        Cache-->>AgentLoop: return cached BootstrapContext
+    end
+    Cache-->>AgentLoop: BootstrapContext
+    AgentLoop->>SPB: renderBootstrapSections(ctx)
+    SPB-->>AgentLoop: { identity, workspace_instructions, workspace_context }
+```
+
+### Flow: Sub-Agent Bootstrap Filtering
+
+```mermaid
+flowchart LR
+    A[Parent BootstrapContext\nfull: SOUL+IDENTITY+AGENTS+TOOLS+README]
+    A --> B{Sub-agent role?}
+    B -->|research| C[Full context\nno filtering]
+    B -->|tool / executor| D[Strip SOUL\nStrip README]
+    D --> E[Sub-agent BootstrapContext\nIDENTITY+AGENTS+TOOLS only]
+    C --> F[buildSystemPrompt mode=minimal]
+    E --> F
+```
+
 ## Implementation Checklist
 
 - [ ] `BootstrapFile` registry with 5 entries (SOUL, IDENTITY, AGENTS, TOOLS, README)

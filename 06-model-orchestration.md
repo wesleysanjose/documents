@@ -443,6 +443,146 @@ agents:
 
 ---
 
+## Diagrams
+
+### Architecture: Model Orchestration System
+
+```mermaid
+graph TB
+    subgraph "Model Resolution"
+        CFG[AgentConfig\nagents.defaults.model]
+        PARSE[parseModelSpec\nstring → ModelSpec]
+        RESOLVE[resolveModelSpec\nconfig obj or override string]
+    end
+
+    subgraph "Fallback Chain"
+        PRIMARY[Primary Model\ne.g. claude-sonnet-4-6]
+        FB1[Fallback 1\ne.g. claude-haiku-4-5]
+        FB2[Fallback 2\ne.g. deepseek-chat]
+        CLASSIFY[classifyError\n6 error classes]
+        RETRY{retriable?}
+    end
+
+    subgraph "Auth Rotation"
+        POOL[Key Pool\nkeys · usageCounts · lastIndex]
+        STRAT{Strategy}
+        RR[round-robin]
+        RND[random]
+        LU[least-used]
+    end
+
+    subgraph "Thinking Mode"
+        TM[ThinkingConfig\nmode · budgetTokens]
+        COMPLEX[estimateComplexity\n5 heuristic signals]
+        DECIDE[ThinkingDecision\nenabled · budgetTokens · reason]
+    end
+
+    subgraph "Providers"
+        ANT[Anthropic]
+        OAI[OpenAI-compat\nDeepSeek · Kimi · Volcengine · Z.AI]
+        OR[OpenRouter\n+ guards]
+        OLLAMA[Ollama\nlocal]
+        GEM[Gemini]
+    end
+
+    CFG --> RESOLVE --> PARSE
+    PARSE --> PRIMARY
+    PRIMARY --> CLASSIFY --> RETRY
+    RETRY -->|Yes| FB1 --> CLASSIFY
+    FB1 --> FB2 --> CLASSIFY
+    RETRY -->|No| ERROR[throw final error]
+
+    CFG --> POOL --> STRAT
+    STRAT --> RR & RND & LU
+
+    TM --> DECIDE
+    COMPLEX --> DECIDE
+
+    PRIMARY --> ANT & OAI & OR & OLLAMA & GEM
+```
+
+### Flow: Fallback Chain Execution
+
+```mermaid
+flowchart TD
+    START[callWithFallback\nmodelConfig + callFn] --> BUILD[Build chain:\nprimary + fallbacks]
+    BUILD --> ITER[Try next model in chain]
+    ITER --> AUTH[resolveAuthKey\nrotation pool or single]
+    AUTH --> CALL[callFn spec + authKey]
+    CALL --> SUCCESS{Success?}
+    SUCCESS -->|Yes| RETURN[return ModelCallResult\nresult · usedModel · attemptCount]
+    SUCCESS -->|No| CLASS[classifyError]
+    CLASS --> RET{isRetriableError?}
+    RET -->|No - content_policy\nor context_too_long| THROW[throw immediately\nno fallback]
+    RET -->|Yes - rate_limit\nauth_failure · model_unavailable| MORE{More models\nin chain?}
+    MORE -->|Yes| LOG[log warn: trying next]
+    LOG --> ITER
+    MORE -->|No| THROW2[throw: all models failed\nN attempts]
+```
+
+### Flow: Thinking Mode Decision
+
+```mermaid
+flowchart TD
+    A[resolveThinkingMode called] --> B{explicitOverride\nset?}
+    B -->|none| NEVER[disabled\noverride:none]
+    B -->|low| LOW[enabled · 1024 tokens]
+    B -->|high| HIGH[enabled · 10000 tokens]
+    B -->|not set| C{cfg.thinking.mode?}
+    C -->|never| NEVER2[disabled · config:never]
+    C -->|always| ALWAYS[enabled · budgetTokens from cfg]
+    C -->|low| LOW2[enabled · 1024 tokens]
+    C -->|high| HIGH2[enabled · 10000 tokens]
+    C -->|auto| D{isHeartbeat?}
+    D -->|Yes| SKIP[disabled · heartbeat skips thinking]
+    D -->|No| E[estimateComplexity\n5 signals: length · keywords · questions]
+    E --> F{score ≥ threshold\ndefault 0.6?}
+    F -->|No| G[disabled · complexity too low]
+    F -->|Yes| H[enabled · budget = 1024 + score×20000]
+```
+
+### Component: Provider Client Factory
+
+```mermaid
+graph LR
+    FACTORY[createProviderClient\nspec + apiKey]
+
+    FACTORY -->|provider=anthropic| ANT[AnthropicClient\napi.anthropic.com]
+    FACTORY -->|provider=openai| OAI[OpenAIClient\napi.openai.com/v1]
+    FACTORY -->|provider=deepseek| DS[OpenAICompatClient\napi.deepseek.com/v1]
+    FACTORY -->|provider=openrouter| OR[OpenAICompatClient\nopenrouter.ai/api/v1\n+ OR guards applied]
+    FACTORY -->|provider=ollama| OL[OpenAICompatClient\nlocalhost:11434/v1\nno auth]
+    FACTORY -->|provider=gemini| GEM[GeminiClient\ngenerativelanguage.googleapis.com]
+    FACTORY -->|provider=volcengine| VO[OpenAICompatClient\nark.cn-beijing.volces.com]
+    FACTORY -->|provider=kimi| KI[OpenAICompatClient\napi.moonshot.cn/v1]
+    FACTORY -->|provider=zai| ZA[OpenAICompatClient\napi.z.ai/v1]
+```
+
+### Sequence: Auth Key Rotation (Round-Robin)
+
+```mermaid
+sequenceDiagram
+    participant Caller
+    participant Resolver as resolveAuthKey
+    participant State as AuthRotationState
+
+    Note over State: keys=[K1,K2,K3], lastIndex=1
+
+    Caller->>Resolver: resolveAuthKey(spec, rotation)
+    Resolver->>State: selectKeyIndex(round-robin)
+    State->>State: index = (lastIndex+1) % 3 = 2
+    State->>State: usageCounts[2]++, lastIndex=2
+    State-->>Resolver: keys[2] = K3
+    Resolver-->>Caller: API key K3
+
+    Caller->>Resolver: resolveAuthKey again
+    Resolver->>State: selectKeyIndex(round-robin)
+    State->>State: index = (2+1) % 3 = 0
+    State->>State: usageCounts[0]++, lastIndex=0
+    State-->>Resolver: keys[0] = K1
+    Resolver-->>Caller: API key K1
+```
+
 ## Implementation Checklist
 
 - [ ] `ModelSpec` with `model`, `provider`, `baseUrl`, `maxTokens`, `temperature`, `headers`

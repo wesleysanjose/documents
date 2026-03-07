@@ -367,6 +367,140 @@ agents:
 
 ---
 
+## Diagrams
+
+### Architecture: 26-Section System Prompt Pipeline
+
+```mermaid
+graph TB
+    subgraph "Inputs"
+        BC[BootstrapContext\nSOUL·IDENTITY·AGENTS·TOOLS·README]
+        SS[SkillsSnapshot\nversion + skills list]
+        PE[PeerAgents\nagent registry]
+        ME[MemoryExcerpts\ntop-K recalled]
+        SC[SessionContext\nID·turn·compactions]
+    end
+
+    subgraph "Section Builders (26 — fixed order)"
+        direction LR
+        S01[01 preamble]
+        S02[02 identity]
+        S03[03 datetime]
+        S04[04 workspace_context]
+        S05[05 workspace_instructions]
+        S06[06 skills]
+        S07[07 tools_intro]
+        S08[08 tool_policy]
+        S09[09 memory_instructions]
+        S10[10 channel_context]
+        S11[11 session_context]
+        S12[12 model_context]
+        S13[13 agent_network]
+        S14[14 acp_instructions]
+        S15[15 persona_rules]
+        S16[16 format_rules]
+        S17[17 language_rules]
+        S18[18 safety_rules]
+        S19[19 compaction_rules]
+        S20[20 cron_context]
+        S21[21 remote_skills]
+        S22[22 plugin_context]
+        S23[23 workspace_memory]
+        S24[24 user_prefs]
+        S25[25 closing_rules]
+        S26[26 turn_stamp]
+    end
+
+    subgraph "Assembly"
+        PM{PromptMode\nfull · minimal · none}
+        CACHE[Hash-based Cache\nper-session]
+        OUT[Final system string\nparagraphs joined]
+    end
+
+    BC --> S02 & S04 & S05
+    SS --> S06
+    PE --> S13
+    ME --> S23
+    SC --> S11
+
+    S01 --> PM
+    S02 --> PM
+    S03 --> PM
+    S06 --> PM
+    S11 --> PM
+    S13 --> PM
+    S25 --> PM
+    PM --> CACHE --> OUT
+```
+
+### Flow: buildSystemPrompt Execution
+
+```mermaid
+flowchart TD
+    A[buildSystemPrompt called\nctx + mode] --> B{mode = none?}
+    B -->|Yes| C[return empty string]
+    B -->|No| D[computePromptInputHash\nbootstrap+skills+peers+channel]
+    D --> E{Cache hit?}
+    E -->|Yes, same hash| F[return cached prompt]
+    E -->|No / changed| G[Iterate SECTION_BUILDERS\nin registry order]
+    G --> H{builder.modes\nincludes mode?}
+    H -->|No| I[skip section]
+    H -->|Yes| J{isSectionDisabled?\ncfg.prompt.disabledSections}
+    J -->|Yes| I
+    J -->|No| K[builder.build ctx]
+    K --> L{returned content?}
+    L -->|undefined / empty| I
+    L -->|string| M[push to parts]
+    M --> N{More builders?}
+    N -->|Yes| H
+    N -->|No| O[parts.join double-newline]
+    O --> P[store in cache]
+    P --> Q[return prompt string]
+```
+
+### Component: Mode vs Sections Included
+
+```mermaid
+graph LR
+    subgraph "mode = full (all 26)"
+        F1[preamble · identity · datetime\nworkspace_context · workspace_instructions\nskills · tools_intro · tool_policy\nmemory_instructions · channel_context\nsession_context · model_context · agent_network\nacp_instructions · persona_rules · format_rules\nlanguage_rules · safety_rules · compaction_rules\ncron_context · remote_skills · plugin_context\nworkspace_memory · user_prefs · closing_rules · turn_stamp]
+    end
+
+    subgraph "mode = minimal (5 sections)"
+        M1[preamble · identity · datetime\nsession_context · closing_rules]
+    end
+
+    subgraph "mode = none"
+        N1[empty string]
+    end
+```
+
+### Sequence: System Prompt Cache Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant Loop as Agent Loop
+    participant SPB as Prompt Builder
+    participant Cache as PromptCache
+    participant Builders as SectionBuilders
+
+    Loop->>SPB: buildSystemPrompt(ctx, "full")
+    SPB->>SPB: computePromptInputHash(ctx)
+    SPB->>Cache: lookup(hash)
+    alt cache miss
+        Cache-->>SPB: null
+        loop for each of 26 SectionBuilders
+            SPB->>Builders: builder.build(ctx)
+            Builders-->>SPB: string | undefined
+        end
+        SPB->>SPB: join non-empty parts
+        SPB->>Cache: store(hash, prompt)
+    else cache hit
+        Cache-->>SPB: cached prompt string
+    end
+    SPB-->>Loop: system prompt string
+```
+
 ## Implementation Checklist
 
 - [ ] `SectionName` type with all 26 names in fixed order

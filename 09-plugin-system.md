@@ -445,6 +445,126 @@ plugins:
 
 ---
 
+## Diagrams
+
+### Architecture: Plugin System Components
+
+```mermaid
+graph TB
+    subgraph "4 Search Locations (priority order)"
+        P1[1 · .openclaw/plugins\nworkspace-local]
+        P2[2 · ~/.openclaw/plugins\nglobal user]
+        P3[3 · node_modules/@openclaw\nnpm-installed]
+        P4[4 · frameworkDir/plugins\nbuilt-in]
+    end
+
+    subgraph "Discovery & Validation"
+        SCAN[loadPluginManifestRegistry\nscan dirs · parse plugin.json]
+        DEDUP[Deduplicate by id\nfirst found wins]
+        VALIDATE[validateManifest\nrequired fields · kind enum]
+    end
+
+    subgraph "Enable/Disable Resolution"
+        ENABLE[resolveEffectiveEnableState\nexplicit > builtin > opt-out]
+        SLOT[resolveMemorySlotDecision\none memory plugin at a time]
+        ACP_CHECK[ACP guard\nacpEnabled=false → skip acpx]
+    end
+
+    subgraph "What Plugins Provide"
+        TOOLS[Tool Definitions\nname · description · schema · handler]
+        SKILLS[Skill Directories\n→ Doc 04 source 4]
+        CHANNELS[Channel Handlers]
+    end
+
+    subgraph "Registration"
+        TOOL_REG[ToolRegistry.register\nper-tool + pluginId tag]
+        SKILL_DISC[Skills Discovery\nresolvePluginSkillDirs]
+    end
+
+    P1 & P2 & P3 & P4 --> SCAN --> DEDUP --> VALIDATE
+    VALIDATE --> ENABLE --> SLOT --> ACP_CHECK
+    ACP_CHECK --> TOOLS & SKILLS & CHANNELS
+    TOOLS --> TOOL_REG
+    SKILLS --> SKILL_DISC
+```
+
+### Flow: Plugin Discovery & Load
+
+```mermaid
+flowchart TD
+    START[loadPluginManifestRegistry] --> ITER[For each search dir]
+    ITER --> EXISTS{dir exists?}
+    EXISTS -->|No| NEXT[next dir]
+    EXISTS -->|Yes| LIST[list subdirectories]
+    LIST --> CHECK{plugin.json\nexists?}
+    CHECK -->|No| NEXT
+    CHECK -->|Yes| PARSE[JSON.parse plugin.json]
+    PARSE --> VALID{validateManifest\nid·name·version·kind?}
+    VALID -->|Error| ERR_REC[PluginRecord with loadError]
+    VALID -->|OK| SEEN{id already\nseen?}
+    SEEN -->|Yes| SKIP[skip - lower priority]
+    SEEN -->|No| MARK[seen.add id]
+    MARK --> BUILD[buildPluginRecord\nresolve skill dirs + load tools]
+    BUILD --> PATH_CHECK{skill/tool paths\ninside rootDir?}
+    PATH_CHECK -->|No| WARN[log warn + skip path]
+    PATH_CHECK -->|Yes| PUSH[push PluginRecord]
+    PUSH & ERR_REC --> NEXT
+    NEXT --> DONE[return PluginRegistry]
+```
+
+### Flow: Enable State Resolution
+
+```mermaid
+flowchart TD
+    A[resolveEffectiveEnableState\npluginId · origin] --> B{explicitly\ndisabled?}
+    B -->|Yes| DISABLED[enabled=false\nexplicitly disabled]
+    B -->|No| C{enabled\n=== true?}
+    C -->|Yes| ENABLED[enabled=true\nexplicitly enabled]
+    C -->|No| D{enabled\n=== false?}
+    D -->|Yes| DISABLED
+    D -->|No| E{origin = builtin?}
+    E -->|Yes| ENABLED2[enabled=true\nbuiltin default]
+    E -->|No| ENABLED3[enabled=true\ninstalled opt-out model]
+
+    ENABLED & ENABLED2 & ENABLED3 --> MEM{kind = memory?}
+    MEM -->|No| FINAL_ENABLED[plugin included]
+    MEM -->|Yes| SLOT{resolveMemorySlotDecision\nslot configured?}
+    SLOT -->|slot = this id| MEM_SEL[memory plugin selected]
+    SLOT -->|slot = other id| MEM_SKIP[skip - slot taken by other]
+    SLOT -->|no slot config| MEM_FIRST{already selected?}
+    MEM_FIRST -->|No - first wins| MEM_SEL
+    MEM_FIRST -->|Yes - already taken| MEM_SKIP
+```
+
+### Component: Plugin Tool Registration Flow
+
+```mermaid
+sequenceDiagram
+    participant Loader as Plugin Loader
+    participant Manifest as plugin.json
+    participant ToolFile as Tool Definition File
+    participant Registry as ToolRegistry
+    participant Pipeline as Tool Policy Pipeline
+
+    Loader->>Manifest: read tools[] paths
+    loop for each tool path
+        Loader->>ToolFile: requireModule(resolvedPath)
+        ToolFile-->>Loader: export default AgentTool | AgentTool[]
+        Loader->>Loader: tag groups with plugin:{id}
+        Loader->>Loader: checkPluginRequirements\n(env vars · binaries)
+        alt requirements met
+            Loader->>Registry: register(tool)
+        else missing requirements
+            Loader->>Loader: log.debug + skip
+        end
+    end
+
+    Note over Registry: All plugin tools now in registry
+    Note over Pipeline: L5 channelAllowlist applied per tool
+    Pipeline->>Registry: resolveForCall(context)
+    Registry-->>Pipeline: filtered tool list
+```
+
 ## Implementation Checklist
 
 - [ ] `PluginManifest` interface with `id`, `kind`, `tools`, `skills`, `requires`, `slot`

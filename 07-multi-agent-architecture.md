@@ -477,6 +477,148 @@ async function runInSandbox(params: {
 
 ---
 
+## Diagrams
+
+### Architecture: Agent Isolation Model
+
+```mermaid
+graph TB
+    subgraph "Agent A (main)"
+        MA_MEM[(SQLite\nmain.sqlite)]
+        MA_SESS[Session Store\nmain-sessions.json]
+        MA_TOOLS[Tool Registry\nagent-A tools]
+        MA_BOOT[Bootstrap Context\nSOUL · IDENTITY · AGENTS]
+        MA_LOOP[Agent Loop\nAgent A]
+    end
+
+    subgraph "Agent B (specialist)"
+        MB_MEM[(SQLite\nspecialist.sqlite)]
+        MB_SESS[Session Store\nspec-sessions.json]
+        MB_TOOLS[Tool Registry\nagent-B tools]
+        MB_BOOT[Bootstrap Context\nIDENTITY · AGENTS]
+        MB_LOOP[Agent Loop\nAgent B]
+    end
+
+    subgraph "Shared (read-only)"
+        CFG[AgentConfig]
+        REG[AgentRegistry]
+        ACP_BUS[ACP Transport\nIn-process message bus]
+        THREAD[ThreadManager]
+    end
+
+    MA_LOOP <--> MA_MEM & MA_SESS & MA_TOOLS & MA_BOOT
+    MB_LOOP <--> MB_MEM & MB_SESS & MB_TOOLS & MB_BOOT
+
+    MA_LOOP <-->|ACP messages| ACP_BUS
+    MB_LOOP <-->|ACP messages| ACP_BUS
+    ACP_BUS <--> THREAD
+    REG --> MA_LOOP & MB_LOOP
+    CFG --> MA_LOOP & MB_LOOP
+
+    Note1[NO shared mutable state\nbetween agents]
+```
+
+### Flow: Inline Sub-Agent Spawn
+
+```mermaid
+flowchart TD
+    A[Main Agent\ncallDepth=0] --> B[spawnSubAgent\nrole=tool · task=...]
+    B --> C[Generate ephemeral ID\nsub_mainId_abc12345]
+    C --> D[filterBootstrapForSubAgent\nrole=tool → strip SOUL + README]
+    D --> E[buildSystemPrompt\nmode=minimal]
+    E --> F[runToolPolicyPipeline\ncallDepth=1 · profile=readonly · isOwner=false]
+    F --> G[AgentRunner\nephemeral session]
+    G --> H[LLM call with\nreduced tools + minimal prompt]
+    H --> I{Success?}
+    I -->|Yes| J[SubAgentResult\noutput · toolCallsMade · tokensUsed]
+    I -->|No| K[SubAgentResult\nsuccess=false · error=...]
+    J & K --> L[Return to Main Agent\nas tool call result]
+    L --> M[Sub-agent context\ndiscarded — no persistence]
+```
+
+### Sequence: ACP Peer-to-Peer Messaging
+
+```mermaid
+sequenceDiagram
+    participant AgentA
+    participant Router as ACPRouter
+    participant Transport as InProcessTransport
+    participant Registry as AgentRegistry
+    participant AgentB
+
+    AgentA->>Router: sendTask(toAgentId=B, task={...})
+    Router->>Router: create ACPMessage envelope\nmessage_id=UUID · thread_id=UUID
+    Router->>Registry: get(agentId=B)
+    Registry-->>Router: AgentRecord for B
+    Router->>Transport: deliver(message, targetRecord)
+    Transport->>Transport: queue[B].push(message)
+    Transport->>AgentB: notify listener (if subscribed)
+
+    AgentB->>Transport: drain(agentId=B)
+    Transport-->>AgentB: [ ACPMessage ]
+    AgentB->>AgentB: process task in thread session
+    AgentB->>Router: send reply\ntype=result · reply_to=original_message_id
+
+    Router->>Transport: notifyReply(replyMessage)
+    Transport->>AgentA: invoke replyHandler(message_id)
+    AgentA-->>AgentA: waitForReply resolves
+```
+
+### Component: ACP Message Types & Thread Flow
+
+```mermaid
+graph LR
+    subgraph "ACPMessageType"
+        TASK[task\nassign work]
+        RESULT[result\nreturn output]
+        QUERY[query\nask question]
+        RESP[response\nanswer query]
+        STATUS[status\nheartbeat]
+        ERROR[error\nnotify failure]
+        CANCEL[cancel\nstop pending task]
+    end
+
+    subgraph "Thread Lifecycle"
+        T1[thread created\nfirst task message]
+        T2[agent processes\nin thread session]
+        T3[result sent\nreply_to=task_id]
+        T4[thread stays open\nfor follow-up messages]
+        T5[thread expires\nTTL or explicit close]
+    end
+
+    TASK --> T1 --> T2 --> T3 --> T4
+    T4 --> QUERY --> RESP --> T4
+    T4 --> T5
+    CANCEL --> T5
+```
+
+### Sequence: Multi-Agent Orchestration Pattern
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Coord as Coordinator Agent
+    participant Coder as Coder Agent
+    participant Reviewer as Reviewer Agent
+    participant ACP as ACP Transport
+
+    User->>Coord: "implement and review feature X"
+
+    Coord->>ACP: sendTask → Coder\ntask: "implement feature X"
+    ACP->>Coder: deliver task message
+    Coder->>Coder: implement + write code
+    Coder->>ACP: sendResult → Coord\nresult: code snippet
+
+    ACP->>Coord: deliver result
+    Coord->>ACP: sendTask → Reviewer\ntask: "review this code" + code
+    ACP->>Reviewer: deliver task message
+    Reviewer->>Reviewer: analyze code
+    Reviewer->>ACP: sendResult → Coord\nresult: review feedback
+
+    ACP->>Coord: deliver review
+    Coord->>User: "Here's the implementation + review: ..."
+```
+
 ## Implementation Checklist
 
 - [ ] `AgentRecord` with `agentId`, `role`, `channelId`, `capabilities`, `status`
